@@ -1095,7 +1095,7 @@ function buildOrder(startKey) {
 function load(r, { resume = true, autoplay = true } = {}) {
   player.cur = r; hideErr();
   const useYt = !!r.yt;
-  if (useYt && extMode) { window.open(r.url, "_blank", "noopener"); return; }
+  if (useYt && (extMode || window.self !== window.top)) { window.open(r.url, "_blank", "noopener"); return; }
   if (useYt) { audio.pause(); audio.removeAttribute("src"); ytShow(r, autoplay); }
   else { ytHide(); audio.src = r.url; audio.playbackRate = speed; }
   const start = resume && pos[r.key] > 5 && !done.has(r.key) ? pos[r.key] : 0;
