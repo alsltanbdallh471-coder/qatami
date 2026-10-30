@@ -7,6 +7,8 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="نَبَأٌ عَظِيم: تلاوات الشيخ ناصر القطامي عبر السنين، ليالي رمضان ليلةً ليلة وتلاوات الفروض.">
 <meta name="theme-color" content="#F7F0E1">
+<link rel="preconnect" href="https://archive.org" crossorigin>
+<link rel="dns-prefetch" href="https://archive.org">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap">
@@ -563,7 +565,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 <button type="button" class="vtab" id="vtab" aria-label="إظهار المقطع" title="إظهار المقطع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>
 <div class="ytbox" id="vbox" hidden>
   <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="تصغير" title="تصغير / تكبير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
-  <video id="audio" preload="metadata" playsinline controlsList="nodownload"></video></div>
+  <video id="audio" preload="auto" playsinline controlsList="nodownload"></video></div>
 <div class="ytbox" id="ytbox" hidden><iframe id="ytf" title="مشغل يوتيوب" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
 <dialog class="sharedlg" id="shareDlg" aria-label="بطاقة مشاركة">
   <div class="sd">
@@ -1342,6 +1344,22 @@ let vMoved = false;
   };
   box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
 })();
+
+/* ---------- faster start: warm up the file on touch, and the next one after play ---------- */
+const warm = new Map();
+function warmUp(url) {
+  if (!url || warm.has(url) || /youtube|youtu\.be/.test(url)) return;
+  if (warm.size > 6) warm.delete(warm.keys().next().value);
+  try { const a = new Audio(); a.preload = "metadata"; a.src = url; warm.set(url, a); } catch {}
+}
+document.addEventListener("pointerdown", e => {
+  const b = e.target.closest("[data-play]"); if (!b) return;
+  const r = BY_KEY.get(b.dataset.play); if (r && !r.yt) warmUp(r.url);
+}, { passive: true });
+function warmNext() {
+  try { const i = player.idx + 1; if (i < player.order.length) { const n = player.queue[player.order[i]]; if (n && !n.yt) warmUp(n.url); } } catch {}
+}
+audio.addEventListener("playing", () => setTimeout(warmNext, 1500), { once: false });
 function playKey(key, listCtx) {
   const r = BY_KEY.get(key); if (!r) return;
   if (player.cur && player.cur.key === key && (audio.getAttribute("src") || ytCur)) { togglePlay(); return; }
