@@ -417,6 +417,16 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .ytbox{position:fixed;left:50%;transform:translateX(-50%);bottom:112px;width:min(560px,calc(100% - 32px));aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);z-index:40}
 .ytbox iframe{width:100%;height:100%;border:0;display:block}
+#vbox{bottom:calc(var(--player-h) + 14px + env(safe-area-inset-bottom,0px));touch-action:none;transition:width .2s}
+#vbox.mini{width:min(176px,46vw)}
+#vbox.dragged{transform:none;bottom:auto}
+.vbar{position:absolute;top:0;left:0;right:0;height:34px;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:0 6px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);cursor:grab;touch-action:none}
+.vbar:active{cursor:grabbing}
+.vbar button{width:28px;height:28px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;color:#fff;background:rgba(0,0,0,.45);padding:0}
+.vbar button svg{width:15px;height:15px}
+.vbar .grip{width:36px;height:4px;border-radius:4px;background:rgba(255,255,255,.55)}
+#vbox.mini .vbar{height:28px}#vbox.mini .vbar button{width:22px;height:22px}#vbox.mini .vbar button svg{width:12px;height:12px}
 .ytbox video{width:100%;height:100%;display:block;background:#000;object-fit:contain}
 </style>
 
@@ -515,7 +525,9 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div class="ytbox" id="vbox" hidden><video id="audio" preload="metadata" playsinline controlsList="nodownload"></video></div>
+<div class="ytbox" id="vbox" hidden>
+  <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="تصغير" title="تصغير / تكبير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
+  <video id="audio" preload="metadata" playsinline controlsList="nodownload"></video></div>
 <div class="ytbox" id="ytbox" hidden><iframe id="ytf" title="مشغل يوتيوب" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
 <dialog class="sharedlg" id="shareDlg" aria-label="بطاقة مشاركة">
   <div class="sd">
@@ -1184,6 +1196,25 @@ function closePlayer() {
   paintRows();
 }
 $("#pclose").addEventListener("click", closePlayer);
+$("#vclose").addEventListener("click", closePlayer);
+$("#vmini").addEventListener("click", () => { const v = $("#vbox"); v.classList.toggle("mini"); try { const r = v.getBoundingClientRect(); if (v.classList.contains("dragged")) { v.style.left = Math.min(Math.max(0, r.left), innerWidth - 60) + "px"; } } catch {} });
+(function () {
+  const box = $("#vbox"), bar = $("#vbar"); let sx, sy, ox, oy, on = false;
+  bar.addEventListener("pointerdown", e => {
+    if (e.target.closest("button")) return;
+    const r = box.getBoundingClientRect(); on = true; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+    box.classList.add("dragged"); box.style.left = ox + "px"; box.style.top = oy + "px";
+    try { bar.setPointerCapture(e.pointerId); } catch {}
+  });
+  bar.addEventListener("pointermove", e => {
+    if (!on) return;
+    const w = box.offsetWidth, h = box.offsetHeight;
+    box.style.left = Math.min(Math.max(0, ox + e.clientX - sx), innerWidth - w) + "px";
+    box.style.top = Math.min(Math.max(0, oy + e.clientY - sy), innerHeight - h) + "px";
+  });
+  const end = () => { on = false; };
+  bar.addEventListener("pointerup", end); bar.addEventListener("pointercancel", end);
+})();
 function playKey(key, listCtx) {
   const r = BY_KEY.get(key); if (!r) return;
   if (player.cur && player.cur.key === key && (audio.getAttribute("src") || ytCur)) { togglePlay(); return; }
