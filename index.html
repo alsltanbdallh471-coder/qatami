@@ -299,6 +299,7 @@ h3.grp span{font-family:var(--f-ui);font-size:.78rem;color:var(--muted);font-wei
 .door::after{content:"";position:absolute;top:15px;left:50%;width:9px;height:9px;translate:-50% 0;rotate:45deg;background:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--surface) 75%,transparent),0 0 12px rgba(217,180,94,.55)}
 .door .k{padding-bottom:6px;margin-bottom:2px;position:relative}
 .door b+.m{padding-top:8px;margin-top:4px;border-top:1px solid color-mix(in srgb,var(--line-strong) 40%,transparent);width:78%}
+.dlyear{margin-top:12px}.dlnote{margin-top:8px;font-size:.8rem;color:var(--muted);max-width:60ch}.dlyear svg{width:18px;height:18px}
 .yrdoors{margin-top:22px}
 .door .go{position:relative;margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#FFFDF6;background:var(--gold);padding:5px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(110,79,20,.28)}
 @media (max-width:640px){.door::after{top:11px;width:7px;height:7px}.door .go{font-size:.68rem;padding:4px 11px;margin-top:6px}.door b+.m{width:86%}}
@@ -963,6 +964,32 @@ function cardBlob() { return new Promise(res => $("#cardCv").toBlob(b => res(b),
   addEventListener("hashchange", () => h.classList.remove("hide"));
 })();
 
+
+/* ---------- download a whole year, file by file ---------- */
+let dlBusy = false, dlStop = false;
+async function downloadYear(y, btn) {
+  const rows = yearParts(y).rows.filter(r => !r.yt), label = btn.querySelector("span"), note = btn.parentElement.querySelector(".dlnote");
+  if (dlBusy) { dlStop = true; return; }
+  dlBusy = true; dlStop = false; note.hidden = false;
+  const old = label.textContent; let ok = 0, fail = 0;
+  for (let i = 0; i < rows.length && !dlStop; i++) {
+    const r = rows[i], ext = (r.url.match(/\.(mp3|mp4|m4a)(?:\?|$)/i) || [, "mp3"])[1];
+    const name = (AR(y) + " - " + r.title).replace(/[\\/:*?"<>|]/g, " ").replace(/\s+/g, " ").trim().slice(0, 110) + "." + ext;
+    label.textContent = `جارٍ التحميل ${AR(i + 1)}/${AR(rows.length)} — اضغط للإيقاف`;
+    note.textContent = r.title;
+    try {
+      const res = await fetch(r.url); if (!res.ok) throw 0;
+      const blob = await res.blob(), u = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = u; a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 60000); ok++;
+    } catch { fail++; const a = document.createElement("a"); a.href = r.url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove(); }
+    await new Promise(res => setTimeout(res, 900));
+  }
+  note.textContent = dlStop ? `توقف التحميل بعد ${AR(ok + fail)} من ${AR(rows.length)}` : `انتهى: ${AR(ok)} تحميل${fail ? " · " + AR(fail) + " فُتحت في تبويب جديد" : ""}. إذا لم تظهر كلها فاسمح للموقع بتحميل ملفات متعددة.`;
+  label.textContent = old; dlBusy = false;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-dlyear]"); if (b) downloadYear(+b.dataset.dlyear, b); });
+
 /* ---------- views ---------- */
 let surahFilter = "all";
 const views = {
@@ -1101,7 +1128,8 @@ const views = {
       body = `<section class="block"><div class="block-h"><h2>تلاوات أخرى</h2><button class="btn pri" data-playall="y-${y}-o">${icon("i-play")}تشغيل الكل</button></div>${trackList(P.other, "year")}</section>`;
     }
     return `<div class="page-h"><div class="t"><p class="note">يوافق تقريبًا ${AR(greg(y))}م</p><h1>عام ${AR(y)}هـ</h1>
-        <p>${pl(P.rows.length, "rec")}${ext.length ? ` · ${ext.length === 1 ? "رابط خارجي" : pl(ext.length, "rec") + " خارجية"}` : ""}</p></div></div>
+        <p>${pl(P.rows.length, "rec")}${ext.length ? ` · ${ext.length === 1 ? "رابط خارجي" : pl(ext.length, "rec") + " خارجية"}` : ""}</p>
+        ${P.rows.some(r => !r.yt) ? `<button class="btn pri dlyear" data-dlyear="${y}" type="button">${icon("i-down")}<span>تحميل العام كامل (${AR(P.rows.filter(r => !r.yt).length)})</span></button><div class="dlnote" hidden></div>` : ""}</div></div>
       ${yearRail(y)}
       <div class="ytabs" role="tablist" ${choose ? "hidden" : ""}>${tabs.map(([k, l, n]) => `<a role="tab" href="#y-${y}-${k}" aria-selected="${k === tab}">${l} <span>${AR(n)}</span></a>`).join("")}</div>
       ${body}
