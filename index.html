@@ -949,10 +949,10 @@ function cardBlob() { return new Promise(res => $("#cardCv").toBlob(b => res(b),
   let last = scrollY, acc = 0;
   addEventListener("scroll", () => {
     const y = scrollY, d = y - last; last = y;
-    if (y < 80) { h.classList.remove("hide"); acc = 0; return; }
+    if (y < 24) { h.classList.remove("hide"); acc = 0; return; }
     if (h.contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
     acc = (d > 0) === (acc > 0) ? acc + d : d;
-    if (acc > 12) h.classList.add("hide"); else if (acc < -8) h.classList.remove("hide");
+    if (acc > 12) h.classList.add("hide");
   }, { passive: true });
   addEventListener("hashchange", () => h.classList.remove("hide"));
 })();
