@@ -994,10 +994,7 @@ const views = {
       <div class="grid-c">${COLLECTIONS.filter(c => !c.hide).slice(0, 4).map(collCard).join("")}</div>
     </section>` : ""}
     ${gems.length ? `<section class="block"><div class="block-h"><h2>روائع رمضانية</h2><a class="link-more" href="#c-gems">كل المختارات</a></div>${trackList(gems, "home")}</section>` : ""}
-    <section class="block">
-      <div class="block-h"><h2>السور</h2><a class="link-more" href="#surahs">الفهرس كاملًا</a></div>
-      <div class="grid-s">${[1, 18, 12, 36, 55, 56, 67, 50].map(surahCard).join("")}</div>
-    </section>`;
+`;
   },
   stats() {
     const today = new Date(), days = [];
