@@ -712,12 +712,12 @@ const ARCH_SVG = `<svg class="arch" viewBox="0 0 200 260" aria-hidden="true"><g 
 function door(kind) {
   const rows = ALL.filter(r => r.cat === kind), ys = [...new Set(rows.map(r => r.year).filter(Boolean))].sort((a, b) => a - b);
   const nights = kind === "ramadan" ? rows.filter(r => r.night).length : 0;
-  const fajr = rows.filter(r => r.prayer === "فجر").length, isha = rows.filter(r => r.prayer === "عشاء").length;
+  const fajr = rows.filter(r => r.prayer === "فجر").length, isha = rows.filter(r => r.prayer === "عشاء").length, magh = rows.filter(r => r.prayer === "مغرب").length;
   const meta = !rows.length ? "تُضاف قريبًا"
     : `${pl(rows.length, "rec")} · من ${AR(ys[0])} إلى ${AR(ys[ys.length - 1])}هـ`;
-  const meta2 = !rows.length ? "" : kind === "ramadan" ? `${pl(nights, "clip")} محددة الليلة` : `${AR(fajr)} فجرية · ${AR(isha)} عشائية`;
+  const meta2 = !rows.length ? "" : kind === "ramadan" ? `${pl(nights, "clip")} محددة الليلة` : `${AR(fajr)} فجرية${magh ? " · " + AR(magh) + " مغربية" : ""} · ${AR(isha)} عشائية`;
   return `<a class="door ${kind}" href="#${kind}" style="color:var(--line-strong)">${ARCH_SVG}
-    <span class="k">${kind === "ramadan" ? "التراويح والقيام وأدعية الليالي" : "الفجريات والعشائيات"}</span>
+    <span class="k">${kind === "ramadan" ? "التراويح والقيام وأدعية الليالي" : "الفجريات والمغربيات والعشائيات"}</span>
     <b>${kind === "ramadan" ? "ليالي رمضان" : "تلاوات الفروض"}</b>
     <span class="m">${meta}</span>${meta2 ? `<span class="m">${meta2}</span>` : ""}<span class="go">استمع ‹</span></a>`;
 }
@@ -732,7 +732,7 @@ function yearCard(y, kind) {
   if (rows.length) parts.push(pl(rows.length, "clip"));
   if (nights.size) parts.push(pl(nights.size, "night"));
   if (kind === "fard") { const f = rows.filter(r => r.prayer === "فجر").length, i = rows.filter(r => r.prayer === "عشاء").length;
-    if (f) parts.push(`${AR(f)} فجر`); if (i) parts.push(`${AR(i)} عشاء`); }
+    const mg = rows.filter(r => r.prayer === "مغرب").length; if (f) parts.push(`${AR(f)} فجر`); if (mg) parts.push(`${AR(mg)} مغرب`); if (i) parts.push(`${AR(i)} عشاء`); }
   if (hrs >= 1) parts.push(pl(Math.round(hrs), "hour"));
   return `<a class="yc" href="#y-${y}-${kind === "ramadan" ? "r" : "f"}">
     <span class="yy">${AR(y)}<small>هـ · ${AR(greg(y))}م</small></span>
@@ -923,7 +923,7 @@ async function drawCard() {
   const tg = ctx.createLinearGradient(0, 110, 0, 190); (night ? [[0, "#F8E7B4"], [.55, "#D9B45E"], [1, "#A9832F"]] : [[0, "#A07A2A"], [.55, "#7E5C1A"], [1, "#5C4210"]]).forEach(([o, c]) => tg.addColorStop(o, c));
   ctx.fillStyle = tg; ctx.fillText("نَبَأٌ عَظِيم", W - 110, 178);
   // tag pill (top left)
-  const tag = r.cat === "ramadan" && r.night ? `الليلة ${AR(r.night)}` : r.prayer ? (r.prayer === "فجر" ? "فجرية" : "عشائية") : r.cat === "ramadan" ? "من ليالي رمضان" : "تلاوة مختارة";
+  const tag = r.cat === "ramadan" && r.night ? `الليلة ${AR(r.night)}` : r.prayer ? (r.prayer === "فجر" ? "فجرية" : r.prayer === "مغرب" ? "مغربية" : "عشائية") : r.cat === "ramadan" ? "من ليالي رمضان" : "تلاوة مختارة";
   ctx.font = '600 28px "IBM Plex Sans Arabic"'; const tw = ctx.measureText(tag).width + 56;
   ctx.strokeStyle = G; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.roundRect(110, 122, tw, 62, 31); ctx.stroke();
   ctx.fillStyle = bronze; ctx.textAlign = "center"; ctx.fillText(tag, 110 + tw / 2, 164);
@@ -972,7 +972,7 @@ const views = {
       <div>
         <p class="kicker">رواية حفص عن عاصم</p>
         <h1>ناصر القطامي</h1>
-        <p class="bio">ناصر بن علي بن ناصر القطامي، من مواليد الرياض. أمَّ المصلين في عدد من جوامع الرياض، منها جامع الملك عبدالله في حي الرحمانية، وعُرف بتراويحه المرتّلة الخاشعة. هنا تلاواته عبر السنين: ليالي رمضان ليلةً ليلة، وصلوات الفجر والعشاء.</p>
+        <p class="bio">ناصر بن علي بن ناصر القطامي، من مواليد الرياض. أمَّ المصلين في عدد من جوامع الرياض، منها جامع الملك عبدالله في حي الرحمانية، وعُرف بتراويحه المرتّلة الخاشعة. هنا تلاواته عبر السنين: ليالي رمضان ليلةً ليلة، وصلوات الفجر والمغرب والعشاء.</p>
         <div class="cta"><a class="btn pri" href="#ramadan">ليالي رمضان</a><a class="btn" href="#fard">تلاوات الفروض</a></div>
       </div>
       ${portrait()}
@@ -1072,8 +1072,8 @@ const views = {
   fard() {
     const ys = [...new Set(ALL.filter(r => r.cat === "fard").map(r => r.year).filter(Boolean))].sort((a, b) => b - a);
     const noYear = ALL.filter(r => r.cat === "fard" && !r.year);
-    return `<div class="page-h"><div class="t"><p class="note">صلوات الفجر والعشاء على مدار العام</p><h1>تلاوات الفروض</h1>
-        <p>اختر العام، وتجد الفجريات والعشائيات مرتبة حسب الشهر الهجري واليوم.</p></div></div>
+    return `<div class="page-h"><div class="t"><p class="note">صلوات الفجر والمغرب والعشاء على مدار العام</p><h1>تلاوات الفروض</h1>
+        <p>اختر العام، وتجد الفجريات والمغربيات والعشائيات مرتبة حسب الشهر الهجري واليوم.</p></div></div>
       ${ys.length ? `<div class="ylist">${ys.map(y => yearCard(y, "fard")).join("")}</div>` : `<div class="empty">تُضاف تلاوات الفروض هنا قريبًا.</div>`}
       ${noYear.length ? `<section class="block"><div class="block-h"><h2>بلا سنة محددة</h2></div>${trackList(noYear, "fardp")}</section>` : ""}`;
   },
@@ -1090,7 +1090,7 @@ const views = {
         + (P.ram.length ? `<section class="block"><div class="block-h"><h2>ليلةً ليلة</h2><button class="btn pri" data-playall="y-${y}-r">${icon("i-play")}تشغيل الليالي بالترتيب</button></div>
           ${grouped(P.ram, r => r.night || 0, (k, b) => k ? `${b.length === 1 && b[0].nightTo ? "الليالي " + AR(k) + "–" + AR(b[0].nightTo) : "الليلة " + AR(k)} <span>${pl(b.length, "clip")}</span>` : `مقاطع أخرى من رمضان ${AR(y)}هـ <span>${pl(b.length, "clip")}</span>`)}</section>` : "");
     } else if (tab === "f") {
-      body = `<section class="block"><div class="block-h"><h2>الفجريات والعشائيات</h2><button class="btn pri" data-playall="y-${y}-f">${icon("i-play")}تشغيل بالترتيب</button></div>
+      body = `<section class="block"><div class="block-h"><h2>الفجريات والمغربيات والعشائيات</h2><button class="btn pri" data-playall="y-${y}-f">${icon("i-play")}تشغيل بالترتيب</button></div>
         ${grouped(P.fard, r => r.date ? r.date[1] : 0, (k, b) => k ? `${MONTHS[k - 1]} ${AR(y)}هـ <span>${AR(b.length)}</span>` : `بدون تاريخ محدد <span>${AR(b.length)}</span>`)}</section>`;
     } else {
       body = `<section class="block"><div class="block-h"><h2>تلاوات أخرى</h2><button class="btn pri" data-playall="y-${y}-o">${icon("i-play")}تشغيل الكل</button></div>${trackList(P.other, "year")}</section>`;
