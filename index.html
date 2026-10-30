@@ -1167,8 +1167,11 @@ const views = {
       else if (/^(مغرب|مغربيه|مغربيات)$/.test(t)) { f.cat = "fard"; f.prayer = "مغرب"; chips.push("مغرب"); }
       else f.words.push(toks[i]);
     }
+    const explicit = f.year || f.cat || f.night;
+    const sm = /^y-(\d+)/.exec(curRoute || ""), scope = !f.year && !searchAll && sm ? +sm[1] : null;
+    if (scope) { f.year = scope; chips.unshift("في عام " + AR(scope) + "هـ فقط"); }
     const filtered = f.year || f.cat || f.night, text = f.words.join(" "), num = /^\d+$/.test(text) ? +text : null;
-    const surahs = !text || (filtered && !num) ? [] : range(114, n => n).filter(n => num ? n === num : norm(NAMES[n - 1]).includes(text.replace(/^ال/, "")) || norm(NAMES[n - 1]).includes(text));
+    const surahs = !text || (explicit && !num) ? [] : range(114, n => n).filter(n => num ? n === num : norm(NAMES[n - 1]).includes(text.replace(/^ال/, "")) || norm(NAMES[n - 1]).includes(text));
     const has = r => { const hay = norm(r.title + " " + r.c.title); return f.words.every(w => hay.includes(w) || hay.includes(w.replace(/^ال/, ""))); };
     let rows = filtered
       ? ALL.filter(r => (!f.year || r.year === f.year) && (!f.cat || r.cat === f.cat) && (!f.prayer || r.prayer === f.prayer) && (!f.night || r.night === f.night || (r.nightTo && r.night <= f.night && f.night <= r.nightTo)) && has(r))
@@ -1176,13 +1179,15 @@ const views = {
     rows = rows.sort((x, y) => (y.year || 0) - (x.year || 0) || (x.night || 0) - (y.night || 0)).slice(0, 200);
     return `<div class="page-h"><div class="t"><h1>نتائج «${esc(q)}»</h1>
       ${chips.length ? `<div class="schips">${[...new Set(chips)].map(c => `<span>${c}</span>`).join("")}</div>` : ""}
-      <p>${surahs.length ? AR(surahs.length) + " سورة · " : ""}${AR(rows.length)} تسجيل</p></div></div>
+      <p>${surahs.length ? AR(surahs.length) + " سورة · " : ""}${AR(rows.length)} تسجيل${scope ? ` · <button type="button" data-searchall style="all:unset;cursor:pointer;color:var(--line-strong);text-decoration:underline">ابحث في كل الأعوام</button>` : ""}</p></div></div>
       ${surahs.length ? `<section class="block"><div class="grid-s">${surahs.slice(0, 24).map(surahCard).join("")}</div></section>` : ""}
       ${rows.length ? trackList(rows, "search") : (!surahs.length ? `<div class="empty">لم نجد شيئًا. جرّب مثلًا: «رمضان ١٤٤٤»، «فجر ١٤٢٨»، «ليلة ٢٧ ١٤٣٧» أو اسم سورة مثل «الملك».</div>` : "")}`;
   },
   notfound() { return `<div class="page-h"><div class="t"><h1>الصفحة غير موجودة</h1><p><a href="#">العودة للرئيسية</a></p></div></div>`; }
 };
 
+let searchAll = false;
+document.addEventListener("click", e => { const a = e.target.closest("[data-searchall]"); if (a) { e.preventDefault(); searchAll = true; route(); } });
 let curList = [];      // rows shown in current view (used for "play" context)
 let curRoute = (() => { try { return decodeURIComponent(location.hash.slice(1)); } catch { return ""; } })();
 function syncNav() {
@@ -1193,7 +1198,7 @@ function syncNav() {
 const navStack = []; let navBack = false;
 function navigate(h) {
   if (!navBack && h !== curRoute) { navStack.push({ r: curRoute, y: scrollY }); if (navStack.length > 40) navStack.shift(); }
-  $("#q").value = "";
+  $("#q").value = ""; searchAll = false;
   const sameYear = /^y-\d+/.test(h) && curRoute.split("-").slice(0, 2).join("-") === h.split("-").slice(0, 2).join("-");
   const y0 = scrollY; curRoute = h; route(); scrollTo(0, sameYear ? y0 : 0);
   try { if (location.hash.slice(1) !== h) history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch {}
@@ -1237,7 +1242,7 @@ document.addEventListener("click", e => {
   e.preventDefault(); e.stopPropagation();
   navigate(a.getAttribute("href").slice(1));
 }, true);
-let qT; $("#q").addEventListener("input", () => { clearTimeout(qT); qT = setTimeout(() => { route(); }, 160); });
+let qT; $("#q").addEventListener("input", () => { if (!$("#q").value.trim()) searchAll = false; clearTimeout(qT); qT = setTimeout(() => { route(); }, 160); });
 
 /* list for play-all buttons */
 function listFor(id) {
