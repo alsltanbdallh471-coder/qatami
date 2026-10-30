@@ -374,6 +374,7 @@ dialog.sharedlg::backdrop{background:rgba(30,20,8,.55);backdrop-filter:blur(4px)
 body.pclosed{--player-h:0px}
 body.pclosed .player{display:none}
 body.typing .player{display:none}
+.player{translate:0 var(--vvdy,0px)}
 .player .icon-btn{color:var(--night-muted)}
 .player .icon-btn:hover{background:rgba(245,226,172,.1);color:var(--night-ink)}
 .seek{display:flex;align-items:center;gap:10px;font-size:.75rem;color:var(--night-muted);font-variant-numeric:tabular-nums}
@@ -1370,6 +1371,11 @@ audio.addEventListener("playing", () => setTimeout(warmNext, 1500), { once: fals
 /* hide the player while typing so it does not ride up above the keyboard */
 document.addEventListener("focusin", e => { if (e.target.matches("input[type=text],input[type=search],input:not([type]),textarea")) document.body.classList.add("typing"); });
 document.addEventListener("focusout", e => { if (e.target.matches("input[type=text],input[type=search],input:not([type]),textarea")) setTimeout(() => { if (!document.activeElement || !document.activeElement.matches("input[type=text],input[type=search],input:not([type]),textarea")) document.body.classList.remove("typing"); }, 120); });
+/* iOS: keep the player glued to the real bottom even if the layout viewport ends above it */
+(function(){ const vv = window.visualViewport; if (!vv) return;
+  function fix(){ const dy = Math.round(vv.offsetTop + vv.height - document.documentElement.clientHeight);
+    document.documentElement.style.setProperty("--vvdy", (dy > 0 && dy < 600 ? dy : 0) + "px"); }
+  vv.addEventListener("resize", fix); vv.addEventListener("scroll", fix); addEventListener("scroll", fix, { passive: true }); addEventListener("orientationchange", () => setTimeout(fix, 300)); fix(); })();
 function playKey(key, listCtx) {
   const r = BY_KEY.get(key); if (!r) return;
   if (player.cur && player.cur.key === key && (audio.getAttribute("src") || ytCur)) { togglePlay(); return; }
