@@ -437,7 +437,8 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 .vtab{position:fixed;z-index:41;left:0;top:38vh;width:34px;height:84px;border:1px solid #8F6A22;border-left:0;border-radius:0 18px 18px 0;
   background:linear-gradient(180deg,#34261280,#1E160D);background-color:#1E160D;color:#E3C36A;display:grid;place-items:center;cursor:pointer;box-shadow:6px 8px 22px rgba(0,0,0,.4);padding:0}
 .vtab[hidden]{display:none}.vtab svg{width:22px;height:22px}
-#vbox.mini{width:min(170px,44vw);border:1px solid #C9A24B}
+#vbox.mini{width:min(170px,44vw);border:1px solid #C9A24B;touch-action:none;cursor:grab}
+#vbox.mini .vbar{display:flex}
 #vbox.dragged{transform:none;bottom:auto}
 .vbar{position:absolute;top:0;left:0;right:0;height:34px;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:0 6px;
   background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);cursor:grab;touch-action:none}
@@ -1234,7 +1235,7 @@ function load(r, { resume = true, autoplay = true } = {}) {
   const useYt = !!r.yt;
   if (useYt && (extMode || window.self !== window.top)) { window.open(r.url, "_blank", "noopener"); return; }
   if (useYt) { audio.pause(); audio.removeAttribute("src"); $("#vbox").hidden = true; ytShow(r, autoplay); }
-  else { ytHide(); vTuck(false); $("#vbox").hidden = !r.vid; audio.controls = !!r.vid; audio.src = r.url; audio.playbackRate = speed; }
+  else { ytHide(); vReset(); $("#vbox").hidden = !r.vid; audio.controls = !!r.vid; audio.src = r.url; audio.playbackRate = speed; }
   const start = resume && pos[r.key] > 5 && !done.has(r.key) ? pos[r.key] : 0;
   audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (start && start < audio.duration - 3) audio.currentTime = start; }, { once: true });
   store.set("last", { key: r.key });
@@ -1249,7 +1250,7 @@ function load(r, { resume = true, autoplay = true } = {}) {
 function closePlayer() {
   try { audio.pause(); } catch {}
   audio.removeAttribute("src"); try { audio.load(); } catch {}
-  ytHide(); $("#vbox").hidden = true; hideErr(); vTuck(false);
+  ytHide(); $("#vbox").hidden = true; hideErr(); vReset();
   player.cur = null;
   $("#nowTitle").textContent = "اختر تلاوة للاستماع"; $("#nowSub").textContent = ""; $("#nowNum").textContent = "—";
   document.title = "تلاوات ناصر القطامي";
@@ -1259,30 +1260,53 @@ function closePlayer() {
 }
 $("#pclose").addEventListener("click", closePlayer);
 $("#vclose").addEventListener("click", closePlayer);
+function vReset() {
+  const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
+}
+function vMini(on) {
+  const v = $("#vbox");
+  if (!on) { vReset(); return; }
+  v.classList.add("mini", "dragged"); audio.controls = false;
+  const w = Math.min(170, innerWidth * 0.44);
+  v.style.left = (innerWidth - w - 10) + "px"; v.style.top = "calc(env(safe-area-inset-top,0px) + 66px)";
+}
 function vTuck(on) {
   const v = $("#vbox"), t = $("#vtab");
-  if (on) { v.classList.add("dragged", "mini"); v.style.left = "10px"; v.style.top = "calc(env(safe-area-inset-top,0px) + 66px)"; void v.offsetWidth; v.classList.add("tuck"); audio.controls = false; t.hidden = false; }
-  else { v.classList.remove("tuck", "mini", "dragged"); v.style.left = ""; v.style.top = ""; audio.controls = true; t.hidden = true; }
+  if (on) { v.classList.add("tuck"); t.hidden = false; }
+  else { v.classList.remove("tuck"); t.hidden = true; }
 }
-$("#vmini").addEventListener("click", () => vTuck(true));
-$("#vtab").addEventListener("click", () => vTuck(false));
-audio.addEventListener("click", () => { if ($("#vbox").classList.contains("mini")) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
+$("#vmini").addEventListener("click", () => vMini(!$("#vbox").classList.contains("mini")));
+$("#vtab").addEventListener("click", () => { const v = $("#vbox"); v.style.left = "10px"; vTuck(false); });
+audio.addEventListener("click", () => { if ($("#vbox").classList.contains("mini") && !vMoved) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
+let vMoved = false;
 (function () {
-  const box = $("#vbox"), bar = $("#vbar"); let sx, sy, ox, oy, on = false;
-  bar.addEventListener("pointerdown", e => {
+  const box = $("#vbox"); let sx, sy, ox, oy, on = false;
+  box.addEventListener("pointerdown", e => {
     if (e.target.closest("button")) return;
-    const r = box.getBoundingClientRect(); on = true; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+    if (!box.classList.contains("mini") && !e.target.closest("#vbar")) return;
+    const r = box.getBoundingClientRect(); on = true; vMoved = false; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
     box.classList.add("dragged"); box.style.left = ox + "px"; box.style.top = oy + "px";
-    try { bar.setPointerCapture(e.pointerId); } catch {}
+    try { box.setPointerCapture(e.pointerId); } catch {}
   });
-  bar.addEventListener("pointermove", e => {
+  box.addEventListener("pointermove", e => {
     if (!on) return;
+    if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 6) vMoved = true;
     const w = box.offsetWidth, h = box.offsetHeight;
-    box.style.left = Math.min(Math.max(0, ox + e.clientX - sx), innerWidth - w) + "px";
+    box.style.left = Math.min(Math.max(-w * 0.45, ox + e.clientX - sx), innerWidth - w * 0.55) + "px";
     box.style.top = Math.min(Math.max(0, oy + e.clientY - sy), innerHeight - h) + "px";
   });
-  const end = () => { on = false; };
-  bar.addEventListener("pointerup", end); bar.addEventListener("pointercancel", end);
+  const end = () => {
+    if (!on) return; on = false;
+    setTimeout(() => { vMoved = false; }, 60);
+    if (!vMoved) return;
+    const r = box.getBoundingClientRect(), w = r.width;
+    if (box.classList.contains("mini") && r.left < -w * 0.25) { box.style.left = "10px"; vTuck(true); return; }   /* pushed off the left edge: tuck into the side tab */
+    if (box.classList.contains("mini")) {                                                                        /* snap to the nearest side */
+      box.style.transition = "left .2s ease"; box.style.left = ((r.left + w / 2) < innerWidth / 2 ? 10 : innerWidth - w - 10) + "px";
+      setTimeout(() => { box.style.transition = ""; }, 230);
+    }
+  };
+  box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
 })();
 function playKey(key, listCtx) {
   const r = BY_KEY.get(key); if (!r) return;
