@@ -64,12 +64,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* header */
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--surface) 88%,transparent);
   backdrop-filter:blur(14px) saturate(1.2);border-bottom:1px solid var(--line)}
+header.top{transition:transform .28s ease}
+header.top.hide{transform:translateY(calc(-100% - 12px))}
 header.top::after{content:"";position:absolute;inset:auto 0 -1px;height:1px;background:linear-gradient(90deg,transparent,var(--line-strong),transparent);opacity:.7}
 .top .wrap{display:flex;align-items:center;gap:18px;padding-block:10px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
 .brand svg{width:46px;height:46px;flex:none;filter:drop-shadow(0 3px 6px rgba(110,79,20,.18))}
-.brand .bt{display:flex;flex-direction:column;line-height:1.05}
-.brand b{font-family:var(--f-display);font-size:1.75rem;font-weight:700;padding-top:6px}
+.brand .bt{display:flex;flex-direction:column;line-height:1.2}
+.brand b{font-family:var(--f-display);font-size:1.9rem;font-weight:700;line-height:1.7;padding-top:2px;margin-block:-8px -6px;overflow:visible;color:var(--bronze)}
 .brand span{font-size:.74rem;color:var(--muted);font-weight:500;letter-spacing:.02em}
 nav.tabs{display:flex;gap:2px;flex-wrap:wrap}
 nav.tabs a{white-space:nowrap;text-decoration:none;color:var(--muted);padding:7px 14px;border-radius:999px;font-weight:500;font-size:.92rem;transition:color .15s,background .15s}
@@ -898,6 +900,20 @@ function openCard(r) {
   const d = $("#shareDlg"); try { d.showModal(); } catch { d.setAttribute("open", ""); } drawCard();
 }
 function cardBlob() { return new Promise(res => $("#cardCv").toBlob(b => res(b), "image/png")); }
+
+/* ---------- header auto-hide ---------- */
+(function () {
+  const h = document.querySelector("header.top"); if (!h) return;
+  let last = scrollY, acc = 0;
+  addEventListener("scroll", () => {
+    const y = scrollY, d = y - last; last = y;
+    if (y < 80) { h.classList.remove("hide"); acc = 0; return; }
+    if (h.contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
+    acc = (d > 0) === (acc > 0) ? acc + d : d;
+    if (acc > 12) h.classList.add("hide"); else if (acc < -8) h.classList.remove("hide");
+  }, { passive: true });
+  addEventListener("hashchange", () => h.classList.remove("hide"));
+})();
 
 /* ---------- views ---------- */
 let surahFilter = "all";
