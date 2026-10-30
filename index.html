@@ -1279,7 +1279,7 @@ function load(r, { resume = true, autoplay = true } = {}) {
   if (useYt) { audio.pause(); audio.removeAttribute("src"); $("#vbox").hidden = true; ytShow(r, autoplay); }
   else { ytHide(); vReset(); $("#vbox").hidden = !r.vid; audio.controls = !!r.vid; audio.src = r.url; audio.playbackRate = speed; }
   const start = resume && pos[r.key] > 5 && !done.has(r.key) ? pos[r.key] : 0;
-  audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (start && start < audio.duration - 3) audio.currentTime = start; }, { once: true });
+  audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (start && start < audio.duration - 3) { audio.currentTime = start; toast("نكمل من " + fmt(start)); } }, { once: true });
   store.set("last", { key: r.key });
   $("#nowTitle").textContent = r.title;
   $("#nowSub").textContent = r.c.title + (r.year && r.c.multi ? " · " + yearLabel(r.year) : "");
@@ -1291,6 +1291,7 @@ function load(r, { resume = true, autoplay = true } = {}) {
 }
 function closePlayer() {
   try { audio.pause(); } catch {}
+  try { savePos(); } catch {}
   audio.removeAttribute("src"); try { audio.load(); } catch {}
   ytHide(); $("#vbox").hidden = true; hideErr(); vReset();
   player.cur = null;
@@ -1440,8 +1441,11 @@ function togglePlay() {
 }
 
 audio.addEventListener("play", paintRows);
-audio.addEventListener("pause", () => { tick = null; saveLt(); paintRows(); });
-addEventListener("pagehide", saveLt);
+audio.addEventListener("pause", () => { tick = null; saveLt(); savePos(); paintRows(); });
+function savePos() { const r = player.cur, t = audio.currentTime; if (r && !r.yt && audio.getAttribute("src") && isFinite(t) && t > 5 && !done.has(r.key)) { pos[r.key] = t; store.set("pos", pos); } }
+addEventListener("pagehide", () => { saveLt(); savePos(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) { saveLt(); savePos(); } });
+audio.addEventListener("seeked", savePos);
 audio.addEventListener("error", () => { if (audio.getAttribute("src")) { showErr(); paintRows(); } });
 let lastSave = 0;
 audio.addEventListener("timeupdate", () => {
@@ -1452,7 +1456,7 @@ audio.addEventListener("timeupdate", () => {
   if (!seeking && isFinite(d) && d > 0) { const v = t / d * 1000; seekEl.value = v; seekEl.style.setProperty("--p", v / 10 + "%"); }
   $("#tCur").textContent = fmt(t); $("#tDur").textContent = fmt(d);
   const r = player.cur; if (!r) return;
-  if (Date.now() - lastSave > 4000) { lastSave = Date.now(); pos[r.key] = t; store.set("pos", pos); }
+  if (Date.now() - lastSave > 2000) { lastSave = Date.now(); pos[r.key] = t; store.set("pos", pos); }
   if (isFinite(d) && d > 30 && t / d > 0.92 && !done.has(r.key)) { done.add(r.key); saveDone(); }
 });
 audio.addEventListener("ended", () => {
