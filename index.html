@@ -281,6 +281,14 @@ h3.grp span{font-family:var(--f-ui);font-size:.78rem;color:var(--muted);font-wei
 .door .k{font-size:.8rem;color:var(--muted);font-weight:600;position:relative}
 .door b{font-family:var(--f-display);font-size:2.6rem;line-height:1.35;padding-top:.1em;position:relative;background:var(--gold-text);-webkit-background-clip:text;background-clip:text;color:transparent}
 .door .m{font-size:.84rem;color:var(--muted);position:relative}
+@media (max-width:640px){
+  .doors{grid-template-columns:1fr 1fr;gap:10px;margin-block:18px 4px}
+  .door{padding:34px 8px 14px;gap:2px;border-radius:90px 90px 14px 14px}
+  .door::before{inset:5px;border-radius:85px 85px 10px 10px}
+  .door .k{font-size:.66rem;line-height:1.4}
+  .door b{font-size:1.12rem;line-height:1.6;white-space:nowrap}
+  .door .m{font-size:.68rem;line-height:1.5}
+}
 .ylist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .yc{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transition:border-color .15s,transform .15s}
 .yc:hover{border-color:var(--line-strong);transform:translateY(-2px)}
