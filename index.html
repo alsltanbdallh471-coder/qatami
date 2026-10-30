@@ -323,6 +323,12 @@ dialog.sharedlg::backdrop{background:rgba(30,20,8,.55);backdrop-filter:blur(4px)
   backdrop-filter:blur(10px);box-shadow:0 -10px 30px rgba(30,20,8,.25);padding-bottom:env(safe-area-inset-bottom,0px)}
 .player::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--gold)}
 .player .wrap{padding-block:9px 11px;display:grid;gap:4px}
+.pclose{position:absolute;top:-46px;inset-inline-start:14px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:var(--night);color:var(--night-ink);border:1px solid #C9A24B;box-shadow:0 6px 16px rgba(0,0,0,.35);padding:0;z-index:2}
+.pclose:hover{background:#3a2a12;color:#F0D78C}
+.pclose svg{width:16px;height:16px}
+body.pclosed{--player-h:0px}
+body.pclosed .player{display:none}
 .player .icon-btn{color:var(--night-muted)}
 .player .icon-btn:hover{background:rgba(245,226,172,.1);color:var(--night-ink)}
 .seek{display:flex;align-items:center;gap:10px;font-size:.75rem;color:var(--night-muted);font-variant-numeric:tabular-nums}
@@ -459,6 +465,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 </footer>
 
 <div class="player" id="player" aria-label="المشغل">
+  <button class="pclose" id="pclose" title="إغلاق التلاوة" aria-label="إغلاق التلاوة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   <div class="wrap">
     <div class="seek">
       <span id="tCur">٠:٠٠</span>
@@ -1117,7 +1124,7 @@ function buildOrder(startKey) {
   player.order = order; player.idx = order.indexOf(startIdx);
 }
 function load(r, { resume = true, autoplay = true } = {}) {
-  player.cur = r; hideErr();
+  player.cur = r; hideErr(); document.body.classList.remove("pclosed");
   const useYt = !!r.yt;
   if (useYt && (extMode || window.self !== window.top)) { window.open(r.url, "_blank", "noopener"); return; }
   if (useYt) { audio.pause(); audio.removeAttribute("src"); $("#vbox").hidden = true; ytShow(r, autoplay); }
@@ -1133,6 +1140,18 @@ function load(r, { resume = true, autoplay = true } = {}) {
   if (autoplay && !useYt) audio.play().catch(() => {});
   paintRows();
 }
+function closePlayer() {
+  try { audio.pause(); } catch {}
+  audio.removeAttribute("src"); try { audio.load(); } catch {}
+  ytHide(); $("#vbox").hidden = true; hideErr();
+  player.cur = null;
+  $("#nowTitle").textContent = "اختر تلاوة للاستماع"; $("#nowSub").textContent = ""; $("#nowNum").textContent = "—";
+  document.title = "تلاوات ناصر القطامي";
+  if ("mediaSession" in navigator) { try { navigator.mediaSession.metadata = null; } catch {} }
+  document.body.classList.add("pclosed");
+  paintRows();
+}
+$("#pclose").addEventListener("click", closePlayer);
 function playKey(key, listCtx) {
   const r = BY_KEY.get(key); if (!r) return;
   if (player.cur && player.cur.key === key && (audio.getAttribute("src") || ytCur)) { togglePlay(); return; }
