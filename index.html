@@ -431,6 +431,10 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 .ytbox{position:fixed;left:50%;transform:translateX(-50%);bottom:112px;width:min(560px,calc(100% - 32px));aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);z-index:40}
 .ytbox iframe{width:100%;height:100%;border:0;display:block}
 #vbox{bottom:calc(var(--player-h) + 14px + env(safe-area-inset-bottom,0px));touch-action:none;transition:width .2s}
+#vbox.tuck{transform:translateX(-125%)!important;pointer-events:none;transition:transform .28s ease}
+.vtab{position:fixed;z-index:41;left:0;top:38vh;width:34px;height:84px;border:1px solid #8F6A22;border-left:0;border-radius:0 18px 18px 0;
+  background:linear-gradient(180deg,#34261280,#1E160D);background-color:#1E160D;color:#E3C36A;display:grid;place-items:center;cursor:pointer;box-shadow:6px 8px 22px rgba(0,0,0,.4);padding:0}
+.vtab[hidden]{display:none}.vtab svg{width:22px;height:22px}
 #vbox.mini{width:min(170px,44vw);border:1px solid #C9A24B}
 #vbox.dragged{transform:none;bottom:auto}
 .vbar{position:absolute;top:0;left:0;right:0;height:34px;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:0 6px;
@@ -539,6 +543,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button type="button" class="vtab" id="vtab" aria-label="إظهار المقطع" title="إظهار المقطع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>
 <div class="ytbox" id="vbox" hidden>
   <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="تصغير" title="تصغير / تكبير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
   <video id="audio" preload="metadata" playsinline controlsList="nodownload"></video></div>
@@ -1199,7 +1204,7 @@ function load(r, { resume = true, autoplay = true } = {}) {
   const useYt = !!r.yt;
   if (useYt && (extMode || window.self !== window.top)) { window.open(r.url, "_blank", "noopener"); return; }
   if (useYt) { audio.pause(); audio.removeAttribute("src"); $("#vbox").hidden = true; ytShow(r, autoplay); }
-  else { ytHide(); $("#vbox").hidden = !r.vid; audio.controls = !!r.vid; audio.src = r.url; audio.playbackRate = speed; }
+  else { ytHide(); vTuck(false); $("#vbox").hidden = !r.vid; audio.controls = !!r.vid; audio.src = r.url; audio.playbackRate = speed; }
   const start = resume && pos[r.key] > 5 && !done.has(r.key) ? pos[r.key] : 0;
   audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (start && start < audio.duration - 3) audio.currentTime = start; }, { once: true });
   store.set("last", { key: r.key });
@@ -1214,7 +1219,7 @@ function load(r, { resume = true, autoplay = true } = {}) {
 function closePlayer() {
   try { audio.pause(); } catch {}
   audio.removeAttribute("src"); try { audio.load(); } catch {}
-  ytHide(); $("#vbox").hidden = true; hideErr();
+  ytHide(); $("#vbox").hidden = true; hideErr(); vTuck(false);
   player.cur = null;
   $("#nowTitle").textContent = "اختر تلاوة للاستماع"; $("#nowSub").textContent = ""; $("#nowNum").textContent = "—";
   document.title = "تلاوات ناصر القطامي";
@@ -1224,12 +1229,13 @@ function closePlayer() {
 }
 $("#pclose").addEventListener("click", closePlayer);
 $("#vclose").addEventListener("click", closePlayer);
-$("#vmini").addEventListener("click", () => {
-  const v = $("#vbox"), mini = v.classList.toggle("mini");
-  audio.controls = !mini;
-  if (mini) { v.classList.add("dragged"); v.style.left = "10px"; v.style.top = "calc(env(safe-area-inset-top,0px) + 66px)"; }
-  else { v.classList.remove("dragged"); v.style.left = ""; v.style.top = ""; }
-});
+function vTuck(on) {
+  const v = $("#vbox"), t = $("#vtab");
+  if (on) { v.classList.add("dragged", "mini"); v.style.left = "10px"; v.style.top = "calc(env(safe-area-inset-top,0px) + 66px)"; void v.offsetWidth; v.classList.add("tuck"); audio.controls = false; t.hidden = false; }
+  else { v.classList.remove("tuck", "mini", "dragged"); v.style.left = ""; v.style.top = ""; audio.controls = true; t.hidden = true; }
+}
+$("#vmini").addEventListener("click", () => vTuck(true));
+$("#vtab").addEventListener("click", () => vTuck(false));
 audio.addEventListener("click", () => { if ($("#vbox").classList.contains("mini")) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
 (function () {
   const box = $("#vbox"), bar = $("#vbar"); let sx, sy, ox, oy, on = false;
