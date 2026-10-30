@@ -1026,15 +1026,16 @@ const views = {
     <div class="orn"><i></i></div>
     ${lr ? `<div class="resume" style="margin-top:24px"><button class="play" data-play="${esc(lr.key)}" data-resume="1" aria-label="متابعة" style="margin:0">${icon("i-play")}</button>
       <div class="t"><small>تابع من حيث توقفت${pos[lr.key] ? " عند " + fmt(pos[lr.key]) : ""}</small><strong>${esc(lr.title)}</strong> <span class="note">· ${esc(lr.c.title)}</span></div></div>` : ""}
-    <section class="today">${prayerPanel()}${wirdPanel()}</section>
-    <section class="doors">${door("ramadan")}${door("fard")}</section>`;
+    <section class="today">${prayerPanel()}${wirdPanel()}</section>`;
+    const doorsTop = `<section class="doors" style="margin-top:6px">${door("ramadan")}${door("fard")}</section>`;
     if (!ALL.length) return hero + `<div class="empty" style="margin-top:24px">نرتّب التلاوات الآن، وتُضاف هنا قريبًا مقسّمة حسب السنين.</div>`;
     const gems = (COLLECTIONS.find(c => c.id === "gems") || { tracks: [] }).tracks.slice(0, 6).map(t => BY_KEY.get("gems:" + t.id)).filter(Boolean);
-    return hero + `
+    return doorsTop + `
     <section class="block">
       <div class="block-h"><h2>عبر السنين</h2><div class="legend"><span><i class="f"></i>ختمة كاملة</span><span><i></i>تلاوات</span><span>الرقم: عدد التسجيلات</span></div></div>
       ${yearRail()}
     </section>
+    ${hero}
     ${COLLECTIONS.some(c => !c.hide) ? `<section class="block">
       <div class="block-h"><h2>المصاحف والإصدارات</h2><a class="link-more" href="#mushafs">عرض الكل</a></div>
       <div class="grid-c">${COLLECTIONS.filter(c => !c.hide).slice(0, 4).map(collCard).join("")}</div>
