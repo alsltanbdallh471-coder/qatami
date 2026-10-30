@@ -84,6 +84,7 @@ nav.tabs a:hover:not([aria-current]){color:var(--ink);background:var(--brass-sof
 .icon-btn{width:38px;height:38px;border-radius:50%;display:inline-grid;place-items:center;color:var(--muted);transition:background .15s,color .15s}
 .icon-btn:hover{background:var(--brass-soft);color:var(--ink)}
 .icon-btn svg{width:20px;height:20px}
+#backBtnNav{border:1px solid var(--line-strong);background:var(--brass-soft);color:var(--brass)}#backBtnNav[hidden]{display:none}
 
 /* ornament */
 .orn{display:flex;align-items:center;gap:10px;color:var(--line-strong)}
@@ -473,6 +474,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
       <svg><use href="#i-search"/></svg>
       <input id="q" type="search" placeholder="ابحث باسم السورة أو السنة" autocomplete="off" aria-label="بحث">
     </label>
+    <button class="icon-btn" id="backBtnNav" title="رجوع" aria-label="رجوع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
     <button class="icon-btn" id="themeBtn" title="الوضع الليلي" aria-label="تبديل المظهر"><svg><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -1099,13 +1101,21 @@ const views = {
 
 let curList = [];      // rows shown in current view (used for "play" context)
 let curRoute = (() => { try { return decodeURIComponent(location.hash.slice(1)); } catch { return ""; } })();
+const navStack = []; let navBack = false;
 function navigate(h) {
+  if (!navBack && h !== curRoute) { navStack.push({ r: curRoute, y: scrollY }); if (navStack.length > 40) navStack.shift(); }
   $("#q").value = "";
   const sameYear = /^y-\d+/.test(h) && curRoute.split("-").slice(0, 2).join("-") === h.split("-").slice(0, 2).join("-");
   const y0 = scrollY; curRoute = h; route(); scrollTo(0, sameYear ? y0 : 0);
   try { if (location.hash.slice(1) !== h) history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch {}
   $("#view").focus({ preventScroll: true });
+  const bb = $("#backBtnNav"); if (bb) bb.hidden = !navStack.length;
 }
+$("#backBtnNav").addEventListener("click", () => {
+  const p = navStack.pop(); if (!p) return;
+  navBack = true; navigate(p.r); navBack = false; scrollTo(0, p.y);
+  $("#backBtnNav").hidden = !navStack.length;
+});
 function route() {
   const h = curRoute;
   const q = $("#q").value.trim();
