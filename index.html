@@ -1526,9 +1526,12 @@ paintVol();
 function mediaSession(r) {
   if (!("mediaSession" in navigator)) return;
   try {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: r.title, artist: "ناصر القطامي", album: r.c.title });
+    const ico = "https://alsltanbdallh471-coder.github.io/qatami/";
+    navigator.mediaSession.metadata = new MediaMetadata({ title: r.title, artist: "ناصر القطامي", album: r.c.title,
+      artwork: [{ src: ico + "icon-192.png", sizes: "192x192", type: "image/png" }, { src: ico + "icon-512.png", sizes: "512x512", type: "image/png" }] });
     const ms = navigator.mediaSession;
-    ms.setActionHandler("play", () => audio.play());
+    ms.setActionHandler("play", () => { if (player.cur && !audio.getAttribute("src") && !ytCur) load(player.cur); else audio.play().catch(() => {}); });
+    ms.setActionHandler("seekto", d => { if (d && isFinite(d.seekTime)) audio.currentTime = d.seekTime; });
     ms.setActionHandler("pause", () => audio.pause());
     ms.setActionHandler("nexttrack", () => step(1));
     ms.setActionHandler("previoustrack", () => step(-1));
@@ -1536,6 +1539,17 @@ function mediaSession(r) {
     ms.setActionHandler("seekbackward", () => { audio.currentTime -= 10; });
   } catch {}
 }
+
+/* keep the lock-screen / control-center widget alive, also after a call or alarm interrupts playback */
+(function () {
+  if (!("mediaSession" in navigator)) return;
+  const sync = () => { try { if (player.cur) { mediaSession(player.cur); } navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing"; } catch {} };
+  audio.addEventListener("play", sync); audio.addEventListener("pause", sync); audio.addEventListener("playing", sync);
+  document.addEventListener("visibilitychange", sync);
+  let ps = 0;
+  audio.addEventListener("timeupdate", () => { const n = Date.now(); if (n - ps < 1000) return; ps = n; try { if (isFinite(audio.duration) && audio.duration > 0) navigator.mediaSession.setPositionState({ duration: audio.duration, position: Math.min(audio.currentTime, audio.duration), playbackRate: audio.playbackRate || 1 }); } catch {} });
+  if (player.cur) sync();
+})();
 
 /* keyboard */
 addEventListener("keydown", e => {
@@ -1617,7 +1631,7 @@ route();
 const last = store.get("last", null), lr = last && BY_KEY.get(last.key);
 if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.key); player.cur = lr;
   $("#nowTitle").textContent = lr.title; $("#nowSub").textContent = lr.c.title + (pos[lr.key] > 5 ? " · توقفت عند " + fmt(pos[lr.key]) : "");
-  $("#nowNum").textContent = lr.surah ? AR(lr.surah) : "✦"; }
+  $("#nowNum").textContent = lr.surah ? AR(lr.surah) : "✦"; mediaSession(lr); }
 })();
 </script>
 
