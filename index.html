@@ -84,7 +84,9 @@ nav.tabs a:hover:not([aria-current]){color:var(--ink);background:var(--brass-sof
 .icon-btn{width:38px;height:38px;border-radius:50%;display:inline-grid;place-items:center;color:var(--muted);transition:background .15s,color .15s}
 .icon-btn:hover{background:var(--brass-soft);color:var(--ink)}
 .icon-btn svg{width:20px;height:20px}
-#backBtnNav{border:1px solid var(--line-strong);background:var(--brass-soft);color:var(--brass)}#backBtnNav[hidden]{display:none}
+.backfab{position:fixed;z-index:24;inset-inline-end:14px;bottom:calc(var(--player-h) + 14px + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:6px;
+  padding:9px 16px 9px 12px;border-radius:999px;border:1px solid #C9A24B;background:var(--gold);color:#FFFDF6;font:inherit;font-weight:700;font-size:.86rem;cursor:pointer;box-shadow:0 8px 20px rgba(110,79,20,.35)}
+.backfab svg{width:18px;height:18px}.backfab[hidden]{display:none}
 
 /* ornament */
 .orn{display:flex;align-items:center;gap:10px;color:var(--line-strong)}
@@ -474,7 +476,6 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
       <svg><use href="#i-search"/></svg>
       <input id="q" type="search" placeholder="ابحث باسم السورة أو السنة" autocomplete="off" aria-label="بحث">
     </label>
-    <button class="icon-btn" id="backBtnNav" title="رجوع" aria-label="رجوع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
     <button class="icon-btn" id="themeBtn" title="الوضع الليلي" aria-label="تبديل المظهر"><svg><use href="#i-moon"/></svg></button>
   </div>
 </header>
@@ -526,6 +527,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
     <div class="perr" id="perr" hidden></div>
   </div>
 </div>
+<button class="backfab" id="backBtnNav" title="رجوع" aria-label="رجوع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg><span>رجوع</span></button>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="ytbox" id="vbox" hidden>
   <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="تصغير" title="تصغير / تكبير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
