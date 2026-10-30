@@ -281,13 +281,20 @@ h3.grp span{font-family:var(--f-ui);font-size:.78rem;color:var(--muted);font-wei
 .door .k{font-size:.8rem;color:var(--muted);font-weight:600;position:relative}
 .door b{font-family:var(--f-display);font-size:2.6rem;line-height:1.35;padding-top:.1em;position:relative;background:var(--gold-text);-webkit-background-clip:text;background-clip:text;color:transparent}
 .door .m{font-size:.84rem;color:var(--muted);position:relative}
+.door{background:radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,#E3C36A 26%,transparent),transparent 62%),var(--gold-soft);
+  box-shadow:var(--shadow),0 14px 30px rgba(110,79,20,.12)}
+.door::after{content:"";position:absolute;top:15px;left:50%;width:9px;height:9px;translate:-50% 0;rotate:45deg;background:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--surface) 75%,transparent),0 0 12px rgba(217,180,94,.55)}
+.door .k{padding-bottom:6px;margin-bottom:2px;position:relative}
+.door b+.m{padding-top:8px;margin-top:4px;border-top:1px solid color-mix(in srgb,var(--line-strong) 40%,transparent);width:78%}
+.door .go{position:relative;margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#FFFDF6;background:var(--gold);padding:5px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(110,79,20,.28)}
+@media (max-width:640px){.door::after{top:11px;width:7px;height:7px}.door .go{font-size:.68rem;padding:4px 11px;margin-top:6px}.door b+.m{width:86%}}
 @media (max-width:640px){
   .doors{grid-template-columns:1fr 1fr;gap:10px;margin-block:18px 4px}
   .door{padding:34px 8px 14px;gap:2px;border-radius:90px 90px 14px 14px}
   .door::before{inset:5px;border-radius:85px 85px 10px 10px}
   .door .k{font-size:.66rem;line-height:1.4}
-  .door b{font-size:1.12rem;line-height:1.6;white-space:nowrap}
-  .door .m{font-size:.68rem;line-height:1.5}
+  .door b{font-size:1.12rem;line-height:1.7;white-space:nowrap;letter-spacing:0}
+  .door .m{font-size:.62rem;line-height:1.6}
 }
 .ylist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .yc{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);text-decoration:none;color:var(--ink);box-shadow:var(--shadow);transition:border-color .15s,transform .15s}
@@ -405,7 +412,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
   .tracks .acts .share{display:none}
   .ptimes{grid-template-columns:repeat(3,minmax(0,1fr))}
   .brand span{display:none}
-  .door b{font-size:2.1rem}
+  .door b{font-size:1.12rem}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .ytbox{position:fixed;left:50%;transform:translateX(-50%);bottom:112px;width:min(560px,calc(100% - 32px));aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);z-index:40}
@@ -681,7 +688,7 @@ function door(kind) {
   return `<a class="door ${kind}" href="#${kind}" style="color:var(--line-strong)">${ARCH_SVG}
     <span class="k">${kind === "ramadan" ? "التراويح والقيام وأدعية الليالي" : "الفجريات والعشائيات"}</span>
     <b>${kind === "ramadan" ? "ليالي رمضان" : "تلاوات الفروض"}</b>
-    <span class="m">${meta}</span>${meta2 ? `<span class="m">${meta2}</span>` : ""}</a>`;
+    <span class="m">${meta}</span>${meta2 ? `<span class="m">${meta2}</span>` : ""}<span class="go">استمع ‹</span></a>`;
 }
 function yearCard(y, kind) {
   const P = yearParts(y), rows = kind === "ramadan" ? P.ram : P.fard;
