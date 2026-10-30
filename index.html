@@ -300,6 +300,16 @@ h3.grp span{font-family:var(--f-ui);font-size:.78rem;color:var(--muted);font-wei
 .door .k{padding-bottom:6px;margin-bottom:2px;position:relative}
 .door b+.m{padding-top:8px;margin-top:4px;border-top:1px solid color-mix(in srgb,var(--line-strong) 40%,transparent);width:78%}
 .dlyear{margin-top:12px}.dlnote{margin-top:8px;font-size:.8rem;color:var(--muted);max-width:60ch}.dlyear svg{width:18px;height:18px}
+.schips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 2px}.schips span{font-size:.8rem;font-weight:600;padding:3px 12px;border-radius:999px;background:var(--gold);color:#FFFDF6}
+
+@keyframes vpop{from{opacity:0;scale:.92;translate:0 14px}to{opacity:1;scale:1;translate:0 0}}
+@keyframes pslide{from{opacity:0;translate:0 100%}to{opacity:1;translate:0 0}}
+#vbox:not([hidden]){animation:vpop .32s cubic-bezier(.2,.8,.2,1)}
+body:not(.pclosed) .player{animation:pslide .3s ease-out}
+#vbox.snap{transition:left .3s cubic-bezier(.2,.8,.2,1),top .3s cubic-bezier(.2,.8,.2,1),width .3s cubic-bezier(.2,.8,.2,1),transform .3s cubic-bezier(.2,.8,.2,1)}
+#vbox.mini{transition:width .3s cubic-bezier(.2,.8,.2,1)}
+.tracks li{transition:background .2s,box-shadow .2s}
+@media (prefers-reduced-motion:reduce){#vbox,.player{animation:none!important}}
 .yrdoors{margin-top:22px}
 .door .go{position:relative;margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#FFFDF6;background:var(--gold);padding:5px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(110,79,20,.28)}
 @media (max-width:640px){.door::after{top:11px;width:7px;height:7px}.door .go{font-size:.68rem;padding:4px 11px;margin-top:6px}.door b+.m{width:86%}}
@@ -1141,12 +1151,31 @@ const views = {
       ${ext.length ? `<section class="block"><div class="block-h"><h2>في مواقع أخرى</h2></div>${extList(ext)}</section>` : ""}`;
   },
   search(q) {
-    const nq = norm(q), num = /^\d+$/.test(nq) ? +nq : null;
-    const surahs = range(114, n => n).filter(n => num ? n === num : norm(NAMES[n - 1]).includes(nq.replace(/^ال/, "")) || norm(NAMES[n - 1]).includes(nq));
-    const rows = ALL.filter(r => norm(r.title).includes(nq) || norm(r.c.title).includes(nq) || (r.year && String(r.year).includes(nq))).slice(0, 80);
-    return `<div class="page-h"><div class="t"><h1>نتائج «${esc(q)}»</h1><p>${AR(surahs.length)} سورة · ${AR(rows.length)} تسجيل</p></div></div>
+    const nq = norm(q), toks = nq.split(/\s+/).filter(Boolean);
+    const f = { year: null, cat: null, prayer: null, night: null, words: [] }, chips = [];
+    for (let i = 0; i < toks.length; i++) {
+      const t = toks[i].replace(/^ال/, "").replace(/[هـ]+$/, m => (/^\d/.test(toks[i]) ? "" : m));
+      if (/^(13|14)\d\d$/.test(toks[i].replace(/ه$/, ""))) { f.year = +toks[i].replace(/ه$/, ""); chips.push("عام " + AR(f.year) + "هـ"); }
+      else if (/^(ليله|ليالي)$/.test(t) && /^\d{1,2}$/.test(toks[i + 1] || "") && +toks[i + 1] <= 30) { f.night = +toks[++i]; f.cat = f.cat || "ramadan"; chips.push("الليلة " + AR(f.night)); }
+      else if (/^(رمضان|ليالي|تراويح|تهجد|قيام)$/.test(t)) { f.cat = "ramadan"; chips.push("ليالي رمضان"); }
+      else if (/^(فروض|فرض|فرائض)$/.test(t)) { f.cat = "fard"; chips.push("الفروض"); }
+      else if (/^(فجر|فجريه|فجريات)$/.test(t)) { f.cat = "fard"; f.prayer = "فجر"; chips.push("فجر"); }
+      else if (/^(عشاء|عشائيه|عشائيات)$/.test(t)) { f.cat = "fard"; f.prayer = "عشاء"; chips.push("عشاء"); }
+      else if (/^(مغرب|مغربيه|مغربيات)$/.test(t)) { f.cat = "fard"; f.prayer = "مغرب"; chips.push("مغرب"); }
+      else f.words.push(toks[i]);
+    }
+    const filtered = f.year || f.cat || f.night, text = f.words.join(" "), num = /^\d+$/.test(text) ? +text : null;
+    const surahs = !text || (filtered && !num) ? [] : range(114, n => n).filter(n => num ? n === num : norm(NAMES[n - 1]).includes(text.replace(/^ال/, "")) || norm(NAMES[n - 1]).includes(text));
+    const has = r => { const hay = norm(r.title + " " + r.c.title); return f.words.every(w => hay.includes(w) || hay.includes(w.replace(/^ال/, ""))); };
+    let rows = filtered
+      ? ALL.filter(r => (!f.year || r.year === f.year) && (!f.cat || r.cat === f.cat) && (!f.prayer || r.prayer === f.prayer) && (!f.night || r.night === f.night || (r.nightTo && r.night <= f.night && f.night <= r.nightTo)) && has(r))
+      : ALL.filter(r => norm(r.title).includes(nq) || norm(r.c.title).includes(nq) || (r.year && String(r.year).includes(nq)) || (f.words.length > 1 && has(r)));
+    rows = rows.sort((x, y) => (y.year || 0) - (x.year || 0) || (x.night || 0) - (y.night || 0)).slice(0, 200);
+    return `<div class="page-h"><div class="t"><h1>نتائج «${esc(q)}»</h1>
+      ${chips.length ? `<div class="schips">${[...new Set(chips)].map(c => `<span>${c}</span>`).join("")}</div>` : ""}
+      <p>${surahs.length ? AR(surahs.length) + " سورة · " : ""}${AR(rows.length)} تسجيل</p></div></div>
       ${surahs.length ? `<section class="block"><div class="grid-s">${surahs.slice(0, 24).map(surahCard).join("")}</div></section>` : ""}
-      ${rows.length ? trackList(rows, "search") : (!surahs.length ? `<div class="empty">لم نجد شيئًا. جرّب اسم سورة مثل «الملك» أو رقمها أو سنة مثل ١٤٣٨.</div>` : "")}`;
+      ${rows.length ? trackList(rows, "search") : (!surahs.length ? `<div class="empty">لم نجد شيئًا. جرّب مثلًا: «رمضان ١٤٤٤»، «فجر ١٤٢٨»، «ليلة ٢٧ ١٤٣٧» أو اسم سورة مثل «الملك».</div>` : "")}`;
   },
   notfound() { return `<div class="page-h"><div class="t"><h1>الصفحة غير موجودة</h1><p><a href="#">العودة للرئيسية</a></p></div></div>`; }
 };
@@ -1267,15 +1296,16 @@ $("#vclose").addEventListener("click", closePlayer);
 function vReset() {
   const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
 }
+function vSnap() { const v = $("#vbox"); v.classList.add("snap"); setTimeout(() => v.classList.remove("snap"), 340); }
 function vMini(on) {
-  const v = $("#vbox");
+  const v = $("#vbox"); vSnap();
   if (!on) { vReset(); return; }
   v.classList.add("mini", "dragged"); audio.controls = false;
   const w = Math.min(170, innerWidth * 0.44);
   v.style.left = (innerWidth - w - 10) + "px"; v.style.top = "calc(env(safe-area-inset-top,0px) + 66px)";
 }
 function vTuck(on) {
-  const v = $("#vbox"), t = $("#vtab");
+  const v = $("#vbox"), t = $("#vtab"); vSnap();
   if (on) { v.classList.add("tuck"); t.hidden = false; }
   else { v.classList.remove("tuck"); t.hidden = true; }
 }
@@ -1306,8 +1336,8 @@ let vMoved = false;
     const r = box.getBoundingClientRect(), w = r.width;
     if (box.classList.contains("mini") && r.left < -w * 0.25) { box.style.left = "10px"; vTuck(true); return; }   /* pushed off the left edge: tuck into the side tab */
     if (box.classList.contains("mini")) {                                                                        /* snap to the nearest side */
-      box.style.transition = "left .2s ease"; box.style.left = ((r.left + w / 2) < innerWidth / 2 ? 10 : innerWidth - w - 10) + "px";
-      setTimeout(() => { box.style.transition = ""; }, 230);
+      box.classList.add("snap"); box.style.left = ((r.left + w / 2) < innerWidth / 2 ? 10 : innerWidth - w - 10) + "px";
+      setTimeout(() => { box.classList.remove("snap"); }, 330);
     }
   };
   box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
