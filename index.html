@@ -374,6 +374,10 @@ dialog.sharedlg::backdrop{background:rgba(30,20,8,.55);backdrop-filter:blur(4px)
 body.pclosed{--player-h:0px}
 body.pclosed .player{display:none}
 body.typing .player{display:none}
+@keyframes spin{to{rotate:360deg}}
+body.buffering #playBtn{position:relative}
+body.buffering #playBtn::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid transparent;border-top-color:var(--brass);border-inline-end-color:var(--brass);animation:spin .8s linear infinite;pointer-events:none}
+body.buffering #nowSub::after{content:" · جاري التحميل…"}
 .player{translate:0 var(--vvdy,0px)}
 .player .icon-btn{color:var(--night-muted)}
 .player .icon-btn:hover{background:rgba(245,226,172,.1);color:var(--night-ink)}
@@ -1441,6 +1445,9 @@ function togglePlay() {
 }
 
 audio.addEventListener("play", paintRows);
+const bufOn = () => { if (audio.getAttribute("src") && !audio.paused || audio.readyState < 3 && audio.getAttribute("src")) document.body.classList.add("buffering"); }, bufOff = () => document.body.classList.remove("buffering");
+["loadstart", "waiting", "seeking"].forEach(ev => audio.addEventListener(ev, bufOn));
+["playing", "canplay", "error", "pause", "emptied"].forEach(ev => audio.addEventListener(ev, () => { if (ev === "pause" && audio.readyState < 3 && !audio.paused) return; bufOff(); }));
 audio.addEventListener("pause", () => { tick = null; saveLt(); savePos(); paintRows(); });
 function savePos() { const r = player.cur, t = audio.currentTime; if (r && !r.yt && audio.getAttribute("src") && isFinite(t) && t > 5 && !done.has(r.key)) { pos[r.key] = t; store.set("pos", pos); } }
 addEventListener("pagehide", () => { saveLt(); savePos(); });
