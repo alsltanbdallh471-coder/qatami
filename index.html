@@ -299,6 +299,7 @@ h3.grp span{font-family:var(--f-ui);font-size:.78rem;color:var(--muted);font-wei
 .door::after{content:"";position:absolute;top:15px;left:50%;width:9px;height:9px;translate:-50% 0;rotate:45deg;background:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--surface) 75%,transparent),0 0 12px rgba(217,180,94,.55)}
 .door .k{padding-bottom:6px;margin-bottom:2px;position:relative}
 .door b+.m{padding-top:8px;margin-top:4px;border-top:1px solid color-mix(in srgb,var(--line-strong) 40%,transparent);width:78%}
+.yrdoors{margin-top:22px}
 .door .go{position:relative;margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#FFFDF6;background:var(--gold);padding:5px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(110,79,20,.28)}
 @media (max-width:640px){.door::after{top:11px;width:7px;height:7px}.door .go{font-size:.68rem;padding:4px 11px;margin-top:6px}.door b+.m{width:86%}}
 @media (max-width:640px){
@@ -1085,7 +1086,11 @@ const views = {
     const tab = has[tabArg] ? tabArg : has.r ? "r" : has.f ? "f" : "o";
     const tabs = [["r", "ليالي رمضان", has.r], ["f", "تلاوات الفروض", has.f], ["o", "تلاوات أخرى", has.o]].filter(t => t[2]);
     let body = "";
-    if (tab === "r") {
+    const choose = !tabArg && tabs.length > 1;
+    const dc = (k, kicker, title, n, unit) => `<a class="door" href="#y-${y}-${k}" style="color:var(--line-strong)">${ARCH_SVG}<span class="k">${kicker}</span><b>${title}</b><span class="m">${AR(n)} ${unit}</span><span class="go">استمع ‹</span></a>`;
+    if (choose) {
+      body = `<div class="doors yrdoors">${has.r ? dc("r", "التراويح والقيام", "ليالي رمضان", has.r, "مقطع") : ""}${has.f ? dc("f", "الفجر والمغرب والعشاء", "تلاوات الفروض", has.f, "مقطع") : ""}${has.o ? dc("o", "تسجيلات متفرقة", "تلاوات أخرى", has.o, "مقطع") : ""}</div>`;
+    } else if (tab === "r") {
       body = (P.khatmas.length ? `<section class="block"><div class="block-h"><h2>ختمة التراويح</h2><p>مقسمة على السور</p></div><div class="grid-c">${P.khatmas.map(collCard).join("")}</div></section>` : "")
         + (P.ram.length ? `<section class="block"><div class="block-h"><h2>ليلةً ليلة</h2><button class="btn pri" data-playall="y-${y}-r">${icon("i-play")}تشغيل الليالي بالترتيب</button></div>
           ${grouped(P.ram, r => r.night || 0, (k, b) => k ? `${b.length === 1 && b[0].nightTo ? "الليالي " + AR(k) + "–" + AR(b[0].nightTo) : "الليلة " + AR(k)} <span>${pl(b.length, "clip")}</span>` : `مقاطع أخرى من رمضان ${AR(y)}هـ <span>${pl(b.length, "clip")}</span>`)}</section>` : "");
@@ -1098,7 +1103,7 @@ const views = {
     return `<div class="page-h"><div class="t"><p class="note">يوافق تقريبًا ${AR(greg(y))}م</p><h1>عام ${AR(y)}هـ</h1>
         <p>${pl(P.rows.length, "rec")}${ext.length ? ` · ${ext.length === 1 ? "رابط خارجي" : pl(ext.length, "rec") + " خارجية"}` : ""}</p></div></div>
       ${yearRail(y)}
-      <div class="ytabs" role="tablist">${tabs.map(([k, l, n]) => `<a role="tab" href="#y-${y}-${k}" aria-selected="${k === tab}">${l} <span>${AR(n)}</span></a>`).join("")}</div>
+      <div class="ytabs" role="tablist" ${choose ? "hidden" : ""}>${tabs.map(([k, l, n]) => `<a role="tab" href="#y-${y}-${k}" aria-selected="${k === tab}">${l} <span>${AR(n)}</span></a>`).join("")}</div>
       ${body}
       ${ext.length ? `<section class="block"><div class="block-h"><h2>في مواقع أخرى</h2></div>${extList(ext)}</section>` : ""}`;
   },
