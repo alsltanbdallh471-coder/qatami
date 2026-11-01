@@ -595,6 +595,8 @@ dialog.infodlg::backdrop{background:rgba(20,13,5,.6)}
 .fp input.fps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#e3c36a;border:2px solid #fffdf6}
 .fp .times{display:flex;justify-content:space-between;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;padding:0 4px}
 .fp .tport{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;margin-top:14px;padding:16px 8px 12px;border-radius:28px;background:var(--surface);border:1.5px solid color-mix(in srgb,#c9a24b 55%,transparent);box-shadow:0 12px 28px rgba(110,79,20,.16)}
+.fp button,.fp .pills button,.fp .acts5 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.fp button:active{transform:scale(.9);transition:transform .05s}
 .fp .tport button{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer}
 .fp .tport button svg{width:30px;height:30px}
 .fp .tport .pp svg{width:34px;height:34px}
@@ -1895,7 +1897,14 @@ function mediaSession(r) {
     const sk = q("#fpSeek");
     sk.addEventListener("input", () => { fpSeeking = true; sk.style.setProperty("--p", sk.value / 10 + "%"); if (isFinite(audio.duration)) q("#fpCur").textContent = fmt(sk.value / 1000 * audio.duration); });
     sk.addEventListener("change", () => { if (isFinite(audio.duration)) audio.currentTime = sk.value / 1000 * audio.duration; fpSeeking = false; });
-    const go = (id, el) => q(id).addEventListener("click", () => { $(el).click(); setTimeout(sync, 30); });
+    const paintPlay = paused => { q("#fpPlay").innerHTML = `<i><svg><use href="${paused ? "#i-play" : "#i-pause"}"/></svg></i><span>${paused ? "تشغيل" : "إيقاف مؤقت"}</span>`; };
+    const go = (id, el) => q(id).addEventListener("click", () => {
+      const b = q(id);
+      if (id === "#fpPlay") paintPlay(!isPaused());               /* instant icon, audio follows */
+      else if (id === "#fpShuf" || id === "#fpRep") b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      else if (id === "#fpMute") { const u = b.querySelector("use"); if (u) u.setAttribute("href", audio.muted || audio.volume === 0 ? "#i-vol" : "#i-mute"); }
+      $(el).click(); setTimeout(sync, 0);
+    });
     go("#fpPrev", "#prevBtn"); go("#fpNext", "#nextBtn"); go("#fpBack", "#backBtn"); go("#fpFwd", "#fwdBtn"); go("#fpPlay", "#playBtn");
     go("#fpSpeed", "#speedBtn"); go("#fpSleep", "#sleepBtn"); go("#fpShuf", "#shufBtn"); go("#fpRep", "#repBtn"); go("#fpMute", "#muteBtn");
     sync();
