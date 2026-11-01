@@ -1587,10 +1587,15 @@ function paintRows() {
 function showErr() {
   const r = player.cur; if (!r) return;
   const e = $("#perr");
+  if (!navigator.onLine) {
+    e.innerHTML = `<span>لا يوجد اتصال بالإنترنت، فما يمدي تشغيل هذي التلاوة الحين. التلاوات اللي حفظتها داخل الموقع تشتغل بدون نت (تجدها في «المحمّل»)، وللحفظ اضغط ⤓ وأنت متصل.</span>`;
+    e.hidden = false; return;
+  }
   e.innerHTML = `<span>تعذّر تشغيل الملف هنا (بعض نوافذ المعاينة تمنع الصوت من مواقع خارجية).</span><a href="${esc(r.url)}" target="_blank" rel="noopener">افتح الملف مباشرة</a><a href="${esc(r.fb)}" target="_blank" rel="noopener">صفحة المصدر</a>`;
   e.hidden = false;
 }
 function hideErr() { $("#perr").hidden = true; }
+addEventListener("online", () => { if (player.cur && !$("#perr").hidden) { hideErr(); toast("رجع الاتصال، اضغط تشغيل"); } });
 
 /* ---------- YouTube tracks (embedded player, driven by postMessage) ---------- */
 let ytCur = null, ytPlaying = false;
