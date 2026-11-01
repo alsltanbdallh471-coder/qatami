@@ -622,9 +622,8 @@ button:active,a:active,.yk:active,.door:active,.row:active,.now:active{transform
 dialog.sharedlg[open],dialog.infodlg[open]{animation:softin .5s var(--soft)}
 dialog.sharedlg[open]::backdrop,dialog.infodlg[open]::backdrop{animation:bdin .45s ease}
 dialog.sharedlg.closing,dialog.infodlg.closing{animation:softout .3s ease forwards}
-body{transition:background-color .5s ease,color .5s ease}
 .toast{transition:opacity .4s var(--soft),translate .4s var(--soft)}
-a,button,.yk,.door,.row{transition-property:transform,opacity,background-color,border-color,box-shadow,color;transition-duration:.28s;transition-timing-function:var(--soft)}
+a,button,.yk,.door,.row{transition:transform .28s var(--soft),opacity .28s var(--soft)}
 @media (prefers-reduced-motion:reduce){dialog[open],dialog[open]::backdrop,dialog.closing{animation:none!important}body{transition:none}}
 </style>
 
