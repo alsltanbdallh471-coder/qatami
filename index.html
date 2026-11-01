@@ -1427,11 +1427,35 @@ function syncNav() {
   if (on) { const h = document.querySelector("#view h1"); $("#navTitle").textContent = h ? h.textContent.trim() : "رجوع"; }
 }
 const navStack = []; let navBack = false;
-function navigate(h) {
+const SOFT = !!document.body.animate && !matchMedia("(prefers-reduced-motion:reduce)").matches;
+const SEASE = "cubic-bezier(.25,.8,.25,1)";
+function softIn(ghost, r) {
+  if (!SOFT) return;
+  const v = $("#view"); v.getAnimations().forEach(x => x.cancel());
+  const d0 = ghost ? 200 : 0;
+  v.animate([{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }], { duration: 520, easing: SEASE, delay: d0, fill: "backwards" });
+  [...v.querySelectorAll(".yk,.door")].slice(0, 14).forEach((el, i) => el.animate([{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], { duration: 560, easing: SEASE, delay: d0 + 60 + i * 40, fill: "backwards" }));
+  if (ghost) {
+    const t = v.getBoundingClientRect();
+    ghost.animate([
+      { top: r.top + "px", left: r.left + "px", width: r.width + "px", height: r.height + "px", opacity: 1, offset: 0 },
+      { opacity: .75, offset: .55 },
+      { top: t.top + "px", left: "0px", width: innerWidth + "px", height: "150px", opacity: 0, offset: 1 }
+    ], { duration: 640, easing: SEASE, fill: "forwards" }).finished.then(() => ghost.remove(), () => ghost.remove());
+  }
+}
+function navigate(h, src) {
+  let ghost = null, gr = null;
+  if (SOFT && src && src.classList && src.classList.contains("door") && !navBack) {
+    gr = src.getBoundingClientRect(); ghost = src.cloneNode(true); ghost.removeAttribute("href"); ghost.removeAttribute("id");
+    Object.assign(ghost.style, { position: "fixed", margin: "0", zIndex: "70", pointerEvents: "none", top: gr.top + "px", left: gr.left + "px", width: gr.width + "px", height: gr.height + "px" });
+    document.body.appendChild(ghost);
+  }
   if (!navBack && h !== curRoute) { navStack.push({ r: curRoute, y: scrollY }); if (navStack.length > 40) navStack.shift(); }
   $("#q").value = ""; searchAll = false;
   const sameYear = /^y-\d+/.test(h) && curRoute.split("-").slice(0, 2).join("-") === h.split("-").slice(0, 2).join("-");
   const y0 = scrollY; curRoute = h; route(); scrollTo(0, sameYear ? y0 : 0);
+  if (!sameYear) softIn(ghost, gr); else if (ghost) ghost.remove();
   try { if (location.hash.slice(1) !== h) history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch {}
   $("#view").focus({ preventScroll: true });
   syncNav();
@@ -1473,7 +1497,7 @@ document.addEventListener("click", e => {
   const a = e.target.closest('a[href^="#"]');
   if (!a || e.ctrlKey || e.metaKey || e.shiftKey) return;
   e.preventDefault(); e.stopPropagation();
-  navigate(a.getAttribute("href").slice(1));
+  navigate(a.getAttribute("href").slice(1), a);
 }, true);
 let qT; $("#q").addEventListener("input", () => { if (!$("#q").value.trim()) searchAll = false; clearTimeout(qT); qT = setTimeout(() => { route(); }, 160); });
 
