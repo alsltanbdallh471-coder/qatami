@@ -596,6 +596,8 @@ dialog.infodlg::backdrop{background:rgba(20,13,5,.6)}
 .fp .times{display:flex;justify-content:space-between;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;padding:0 4px}
 .fp .tport{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;margin-top:14px;padding:16px 8px 12px;border-radius:28px;background:var(--surface);border:1.5px solid color-mix(in srgb,#c9a24b 55%,transparent);box-shadow:0 12px 28px rgba(110,79,20,.16)}
 .fp button,.fp .pills button,.fp .acts5 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.fp #fpRep{position:relative}
+.fp #fpRep[data-mode=one]::after{content:"١";position:absolute;top:50%;left:50%;translate:-50% -50%;font-size:.62rem;font-weight:800;color:#c9a24b;pointer-events:none}
 .fp button:active{transform:scale(.9);transition:transform .05s}
 .fp .tport button{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer}
 .fp .tport button svg{width:30px;height:30px}
@@ -1901,7 +1903,7 @@ function mediaSession(r) {
     const go = (id, el) => q(id).addEventListener("click", () => {
       const b = q(id);
       if (id === "#fpPlay") paintPlay(!isPaused());               /* instant icon, audio follows */
-      else if (id === "#fpShuf" || id === "#fpRep") b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      else if (id === "#fpShuf") b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
       else if (id === "#fpMute") { const u = b.querySelector("use"); if (u) u.setAttribute("href", audio.muted || audio.volume === 0 ? "#i-vol" : "#i-mute"); }
       $(el).click(); setTimeout(sync, 0);
     });
@@ -1921,7 +1923,7 @@ function mediaSession(r) {
     q("#fpSpeed").textContent = $("#speedBtn").textContent; q("#fpSleep").textContent = $("#sleepBtn").textContent;
     q("#fpSleep").setAttribute("aria-pressed", $("#sleepBtn").getAttribute("aria-pressed") || "false");
     q("#fpShuf").setAttribute("aria-pressed", String(player.shuffle));
-    q("#fpRep").setAttribute("aria-pressed", String(player.repeat !== "off")); q("#fpRep").title = $("#repBtn").title || "";
+    q("#fpRep").setAttribute("aria-pressed", String(player.repeat !== "off")); q("#fpRep").title = $("#repBtn").title || ""; q("#fpRep").dataset.mode = player.repeat;
     q("#fpMute use").setAttribute("href", $("#muteBtn use").getAttribute("href"));
     const saved = typeof offSaved === "function" && offSaved(r), isFav = favs.has(r.key);
     const extra = [row("المدة", r.d || (isFinite(d) ? d : 0) ? fmt(r.d || d) : ""), row("وصلتَ إلى", t > 5 ? fmt(t) : (pos[r.key] > 5 ? fmt(pos[r.key]) : "")),
