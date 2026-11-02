@@ -1981,8 +1981,9 @@ document.addEventListener("click", async e => {
   const ct = e.target.closest("[data-ct]");
   if (ct) { cardTheme = ct.dataset.ct; document.querySelectorAll("[data-ct]").forEach(b => b.setAttribute("aria-pressed", b === ct)); drawCard(); return; }
   const s = e.target.closest("[data-share]");
-  if (s) { const r = BY_KEY.get(s.dataset.share); let base = location.href.split("#")[0]; try { base = (window.top.location.href || base).split("#")[0]; } catch {}
-    const link = base + (r.surah ? "#s-" + r.surah : "#c-" + r.c.id);
+  if (s) { const r = BY_KEY.get(s.dataset.share), SITE = "https://alsltanbdallh471-coder.github.io/qatami/";
+    const base = /github\.io$/.test(location.hostname) ? location.href.split("#")[0].split("?")[0] : SITE;
+    const link = base + (r.year ? "#y-" + r.year + "-" + (r.cat === "ramadan" ? "r" : r.cat === "fard" ? "f" : "o") : r.surah ? "#s-" + r.surah : "");
     try { await navigator.clipboard.writeText(link); toast("نُسخ الرابط"); } catch { toast(link); } return; }
   const sf = e.target.closest("[data-sf]");
   if (sf) { surahFilter = sf.dataset.sf; rerenderKeepScroll(); return; }
