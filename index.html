@@ -636,6 +636,22 @@ a,button,.yk,.door,.row{transition:transform .28s var(--soft),opacity .28s var(-
 [data-share].copied svg{animation:cpop .35s var(--soft)}
 [data-share].copied::after{content:"تم النسخ ✓";position:absolute;bottom:calc(100% + 6px);left:50%;translate:-50% 0;white-space:nowrap;font-size:.78rem;font-weight:700;padding:5px 12px;border-radius:999px;background:#2f8f5b;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:softin .3s var(--soft);pointer-events:none;z-index:9}
 @keyframes cpop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+/* marks */
+.fp .fseek{position:relative}
+.fp .ticks{position:absolute;inset-inline:0;top:6px;height:14px;pointer-events:none;z-index:2}
+.fp .ticks i{position:absolute;top:0;width:3px;height:14px;margin-right:-1.5px;border-radius:2px;background:#e3c36a;box-shadow:0 0 0 1.5px #2b1f0e}
+.fp .mkadd{width:100%;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border-radius:999px;border:1.5px solid #c9a24b;background:transparent;color:#8f6a22;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;touch-action:manipulation}
+:root[data-theme="dark"] .fp .mkadd{color:#e3c36a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fp .mkadd{color:#e3c36a}}
+.fp .mkadd svg{width:22px;height:22px}.fp .mkadd b{font-variant-numeric:tabular-nums;padding:2px 10px;border-radius:999px;background:linear-gradient(135deg,#8f6a22,#c9a24b);color:#fffdf6;font-size:.85rem}
+.fp .mkadd.ok{background:linear-gradient(135deg,#8f6a22,#e3c36a);color:#2a1c0a;border-color:transparent}
+.fp .mklist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.fp .mklist li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:16px;border:1px solid color-mix(in srgb,#c9a24b 40%,transparent)}
+.fp .mklist li.new{animation:softin .4s var(--soft)}
+.fp .mklist .go{display:flex;align-items:center;gap:6px;border:0;background:linear-gradient(135deg,#8f6a22,#c9a24b);color:#fffdf6;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer;flex:none;touch-action:manipulation}
+.fp .mklist .go svg{width:16px;height:16px}.fp .mklist .go b{font-variant-numeric:tabular-nums}
+.fp .mkn{flex:1;min-width:0;border:0;background:transparent;color:inherit;font:inherit;font-size:.95rem;padding:8px 4px;outline:none;border-bottom:1px dashed color-mix(in srgb,#c9a24b 45%,transparent)}
+.mkpage .pbtn{flex:none}
 </style>
 
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
@@ -657,6 +673,9 @@ a,button,.yk,.door,.row{transition:transform .28s var(--soft),opacity .28s var(-
     <symbol id="i-repeat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 20s-7.5-4.6-9.2-9.3C1.6 7.3 3.9 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.3 0 5.6 3.3 4.4 6.7C19.5 15.4 12 20 12 20z"/></symbol>
     <symbol id="i-heart-f" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20s-7.5-4.6-9.2-9.3C1.6 7.3 3.9 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.3 0 5.6 3.3 4.4 6.7C19.5 15.4 12 20 12 20z"/></symbol>
+    <symbol id="i-mark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-mark-f" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
@@ -682,6 +701,7 @@ a,button,.yk,.door,.row{transition:transform .28s var(--soft),opacity .28s var(-
       <a href="#surahs" data-nav="surahs">السور</a>
       <a href="#stats" data-nav="stats">وِردي</a>
       <a href="#fav" data-nav="fav">المفضلة</a>
+      <a href="#marks" data-nav="marks" id="navMarks" hidden>علاماتي</a>
       <a href="#saved" data-nav="saved" id="navSaved" hidden>المحمّل</a>
     </nav>
     <label class="search">
@@ -821,6 +841,10 @@ const store = {
 let favs = new Set(store.get("fav", []));
 let done = new Set(store.get("done", []));
 let pos = store.get("pos", {});
+let marks = store.get("marks", {});
+const saveMarks = () => store.set("marks", marks);
+const markCount = () => Object.values(marks).reduce((a, l) => a + l.length, 0);
+const marksNav = () => { const n = document.getElementById("navMarks"); if (n) n.hidden = !markCount(); };
 const saveFav = () => store.set("fav", [...favs]);
 const saveDone = () => store.set("done", [...done]);
 
@@ -859,6 +883,7 @@ function trackRow(r, ctx) {
   if (r.d) sub.push(fmt(r.d));
   else if (r.surah && !r.t.title) sub.push(`${AR(AYAT[r.surah - 1])} آية`);
   if (pos[r.key] > 5 && !isDone) sub.push(`توقفت عند ${fmt(pos[r.key])}`);
+  if (marks[r.key] && marks[r.key].length) sub.push(`<span class="done">🔖 ${AR(marks[r.key].length)} ${marks[r.key].length > 2 ? "علامات" : marks[r.key].length === 2 ? "علامتان" : "علامة"}</span>`);
   if (isDone) sub.push(`<span class="done">✓ استمعت</span>`);
   if (offSaved(r)) sub.push(`<span class="done">⤓ محمّلة</span>`);
   return `<li class="${playing ? "playing" : ""}" data-key="${esc(r.key)}">
@@ -1183,7 +1208,7 @@ document.addEventListener("click", async e => { const b = e.target.closest("[dat
   if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "اضغط مرة ثانية لحذف الكل"; setTimeout(() => { delete b.dataset.armed; b.textContent = "حذف الكل"; }, 3000); return; }
   try { await caches.delete("qtm-audio-v1"); } catch {} OFF.set.clear(); toast("حُذف كل المحمّل"); route(); });
 function offPaint() {
-  offNav(); offUse();
+  offNav(); offUse(); marksNav();
   document.querySelectorAll("[data-off]").forEach(b => {
     const r = BY_KEY.get(b.dataset.off); if (!r) return; const on = offSaved(r);
     b.classList.toggle("saved", on); b.setAttribute("aria-label", on ? "محمّلة، اضغط لحذفها من الموقع" : "حفظ داخل الموقع للاستماع بدون نت");
@@ -1329,6 +1354,13 @@ const views = {
     const rows = ALL.filter(r => OFF.ok && OFF.set.has(r.url));
     return `<div class="page-h"><div class="t"><h1>المحمّل</h1><p>تلاوات حفظتها داخل الموقع، تشتغل بدون إنترنت. اضغط علامة ✓ مرتين لحذف أي واحدة.</p><p class="note" id="offUse"></p></div></div>
       ${!OFF.ok ? `<div class="empty">الحفظ داخل الموقع يشتغل من الرابط الرسمي للموقع فقط.</div>` : rows.length ? `<div class="toolbar"><button class="btn pri" data-playall="saved">${icon("i-play")}تشغيل المحمّل</button><button class="btn" data-offclear type="button">حذف الكل</button></div>${trackList(rows, "saved")}` : `<div class="empty">ما حفظت شيئًا بعد. اضغط زر التحميل ⤓ بجانب أي تلاوة.</div>`}`;
+  },
+  marks() {
+    const items = []; for (const k in marks) { const r = BY_KEY.get(k); if (r) marks[k].forEach(m => items.push({ r, m })); }
+    const body = items.length ? `<ol class="tracks mkpage">${items.map(({ r, m }) => `<li><button class="pbtn" data-mkgo="${esc(r.key)}" data-t="${m.t}" aria-label="شغّل من ${fmt(m.t)}">${icon("i-play")}</button>
+      <div class="info"><span class="ttl long">${esc(r.title)}</span><span class="sub"><span class="tag r">🔖 ${fmt(m.t)}</span>${m.n ? " · " + esc(m.n) : ""} · ${esc(r.c.title)}${r.year && r.c.multi ? " · " + yearLabel(r.year) : ""}</span></div>
+      <div class="acts"><button class="icon-btn" data-mkdel="${esc(r.key)}" data-t="${m.t}" data-pg="1" aria-label="حذف العلامة">${icon("i-x")}</button></div></li>`).join("")}</ol>` : `<div class="empty">ما أضفت علامات بعد. أثناء الاستماع افتح صفحة «التلاوة الآن» واضغط «علامة هنا».</div>`;
+    return `<div class="page-h"><div class="t"><h1>علاماتي</h1><p>الأماكن اللي علّمتها داخل التلاوات. اضغط تشغيل لتنتقل لها مباشرة. تُحفظ في هذا المتصفح.</p></div></div>${body}`;
   },
   fav() {
     const rows = [...favs].map(k => BY_KEY.get(k)).filter(Boolean);
@@ -1519,6 +1551,7 @@ function route() {
   else if (h === "surahs") { html = views.surahs(); nav = "surahs"; }
   else if (h === "fav") { html = views.fav(); nav = "fav"; }
   else if (h === "saved") { html = views.saved(); nav = "saved"; }
+  else if (h === "marks") { html = views.marks(); nav = "marks"; }
   else if (h === "ramadan") { html = views.ramadan(); nav = "ramadan"; }
   else if (h === "fard") { html = views.fard(); nav = "fard"; }
   else if (h === "stats") { html = views.stats(); nav = "stats"; }
@@ -1530,7 +1563,7 @@ function route() {
   document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === nav) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   moveTab();
   curList = [...document.querySelectorAll("#view [data-list] li")].map(li => BY_KEY.get(li.dataset.key));
-  offNav(); offUse();
+  offNav(); offUse(); marksNav();
   const act = document.querySelector('#view .rail a[aria-current="true"]'), rail = act && act.closest(".rail");
   if (rail) rail.scrollLeft += act.getBoundingClientRect().left - rail.getBoundingClientRect().left - rail.clientWidth / 2 + act.clientWidth / 2;
 }
@@ -1739,7 +1772,7 @@ function ytEnded() {
   if (player.sleepEnd) { player.sleepEnd = false; setSleep(0); toast("انتهى مؤقت النوم"); paintRows(); return; }
   if (player.repeat === "one" && r) { load(r); return; }
   step(1, true);
-  rerenderKeepScroll();
+  { const y = scrollY; route(); scrollTo(0, y); };
 }
 function isPaused() { return ytCur ? !ytPlaying : audio.paused; }
 function togglePlay() {
@@ -1774,7 +1807,7 @@ audio.addEventListener("ended", () => {
   if (player.sleepEnd) { player.sleepEnd = false; setSleep(0); toast("انتهى مؤقت النوم"); paintRows(); return; }
   if (player.repeat === "one") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
   step(1, true);
-  rerenderKeepScroll();
+  { const y = scrollY; route(); scrollTo(0, y); };
 });
 
 /* seek */
@@ -1862,6 +1895,12 @@ function mediaSession(r) {
   const row = (k, v) => v ? `<dt>${k}</dt><dd>${v}</dd>` : "";
   let fpSeeking = false;
   const q = s => dlg.querySelector(s);
+  function paintMarks(flashT) {
+    const r = player.cur; if (!r) return; const l = marks[r.key] || [], d = audio.duration || r.d || 0;
+    const tk = q("#fpTicks"), ul = q("#fpMarks"); if (!tk || !ul) return;
+    tk.innerHTML = d ? l.map(m => `<i style="right:${Math.min(99, m.t / d * 100)}%"></i>`).join("") : "";
+    ul.innerHTML = l.map(m => `<li class="${m.t === flashT ? "new" : ""}"><button class="go" data-mkgo="${esc(r.key)}" data-t="${m.t}" type="button">${icon("i-play")}<b>${fmt(m.t)}</b></button><input class="mkn" data-mkn="${m.t}" value="${esc(m.n || "")}" maxlength="60" placeholder="ملاحظة (اختياري)" aria-label="ملاحظة"><button class="icon-btn" data-mkdel="${esc(r.key)}" data-t="${m.t}" type="button" aria-label="حذف العلامة">${icon("i-x")}</button></li>`).join("");
+  }
   function render() {
     const r = player.cur; if (!r) return; dlg.dataset.key = r.key;
     const catN = r.cat === "ramadan" ? "ليالي رمضان" : r.cat === "fard" ? "تلاوات الفروض" : "";
@@ -1883,7 +1922,7 @@ function mediaSession(r) {
         <button class="icon-btn" id="fpMute" aria-label="كتم الصوت" type="button"><svg><use href="#i-vol"/></svg></button>
         ${canOff ? `<button class="icon-btn ${saved ? "saved" : ""}" data-off="${esc(r.key)}" aria-label="حفظ بدون نت" type="button">${icon(saved ? "i-check" : "i-down")}</button>` : `<a class="icon-btn" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="فتح الملف">${icon("i-down")}</a>`}
       </div>
-      <div class="fseek"><input class="fps" id="fpSeek" type="range" min="0" max="1000" value="0" step="1" aria-label="موضع التشغيل"><div class="times"><span id="fpCur">٠:٠٠</span><span id="fpDur">٠:٠٠</span></div></div>
+      <div class="fseek"><div class="ticks" id="fpTicks"></div><input class="fps" id="fpSeek" type="range" min="0" max="1000" value="0" step="1" aria-label="موضع التشغيل"><div class="times"><span id="fpCur">٠:٠٠</span><span id="fpDur">٠:٠٠</span></div></div>
       <div class="tport">
         <button id="fpPrev" type="button">${icon("i-next")}السابق</button>
         <button id="fpBack" type="button">${icon("i-back")}تأخير ١٠ ث</button>
@@ -1892,6 +1931,8 @@ function mediaSession(r) {
         <button id="fpNext" type="button">${icon("i-prev")}التالي</button>
       </div>
       <div class="pills"><button id="fpSpeed" type="button"></button><button id="fpSleep" type="button"></button><button id="fpShuf" type="button">عشوائي</button></div>
+      <button class="mkadd" id="fpMkAdd" type="button">${icon("i-mark")}<span>علامة هنا</span><b id="fpMkT">٠:٠٠</b></button>
+      <ul class="mklist" id="fpMarks"></ul>
       <h3 class="sec">عن هذه التلاوة</h3>
       <div class="ic">${chips.map(c => `<span>${esc(c)}</span>`).join("")}</div>
       <dl>${row("المجموعة", esc(r.c.title))}${row("العام", r.year ? `${yearLabel(r.year)} · يوافق ${AR(greg(r.year))}م` : "")}${row("التاريخ", date)}<span id="fpExtra" style="display:contents"></span>${row("المصدر", esc(r.c.src ? r.c.src.name : ""))}</dl>
@@ -1901,6 +1942,7 @@ function mediaSession(r) {
         ${r.fb ? `<a class="btn" href="${esc(r.fb)}" target="_blank" rel="noopener">صفحة المصدر</a>` : ""}
       </div>
     </div>`;
+    paintMarks();
     const sk = q("#fpSeek");
     sk.addEventListener("input", () => { fpSeeking = true; sk.style.setProperty("--p", sk.value / 10 + "%"); if (isFinite(audio.duration)) q("#fpCur").textContent = fmt(sk.value / 1000 * audio.duration); });
     sk.addEventListener("change", () => { if (isFinite(audio.duration)) audio.currentTime = sk.value / 1000 * audio.duration; fpSeeking = false; });
@@ -1922,6 +1964,7 @@ function mediaSession(r) {
     const r = player.cur, d = audio.duration, t = audio.currentTime;
     const sk = q("#fpSeek"); if (!sk) return;
     if (!fpSeeking && isFinite(d) && d > 0) { const v = t / d * 1000; sk.value = v; sk.style.setProperty("--p", v / 10 + "%"); q("#fpCur").textContent = fmt(t); }
+    const mt = q("#fpMkT"); if (mt) mt.textContent = fmt(t);
     q("#fpDur").textContent = isFinite(d) && d > 0 ? fmt(d) : (r.d ? fmt(r.d) : "٠:٠٠");
     const paused = isPaused();
     q("#fpPlay").innerHTML = `<i><svg><use href="${paused ? "#i-play" : "#i-pause"}"/></svg></i><span>${paused ? "تشغيل" : "إيقاف مؤقت"}</span>`;
@@ -1937,14 +1980,39 @@ function mediaSession(r) {
   }
   ["timeupdate", "play", "pause", "durationchange", "loadedmetadata", "ratechange", "volumechange"].forEach(ev => audio.addEventListener(ev, sync));
   function open() { if (!player.cur) return; render(); if (!dlg.open) dlg.showModal(); sync(); }
+  dlg.addEventListener("change", e => { const i = e.target.closest("[data-mkn]"); if (!i || !player.cur) return; const m = (marks[player.cur.key] || []).find(x => x.t === +i.dataset.mkn); if (m) { m.n = i.value.trim(); saveMarks(); } });
+  audio.addEventListener("durationchange", () => { if (dlg.open) paintMarks(); });
+  dlg.addEventListener("mkrefresh", () => paintMarks());
   document.querySelector(".player .now").addEventListener("click", open);
   dlg.addEventListener("click", e => {
+    if (e.target.closest("#fpMkAdd")) {
+      const r = player.cur; if (!r) return; const t = Math.floor(audio.currentTime || 0), l = marks[r.key] || (marks[r.key] = []);
+      if (!l.some(m => Math.abs(m.t - t) < 2)) { l.push({ t }); l.sort((a, b) => a.t - b.t); saveMarks(); marksNav(); }
+      paintMarks(t); const b = q("#fpMkAdd"); b.classList.add("ok"); b.querySelector("span").textContent = "تمت الإضافة ✓"; setTimeout(() => { b.classList.remove("ok"); b.querySelector("span").textContent = "علامة هنا"; }, 1600);
+      if (navigator.vibrate) navigator.vibrate(12); return;
+    }
     if (e.target.closest("[data-fpclose]")) { softClose(dlg); return; }
     if (e.target.closest("[data-card]")) { softClose(dlg); return; }
     if (e.target.closest("[data-fav],[data-off]")) setTimeout(() => { if (dlg.open) { const k = dlg.dataset.key; dlg.dataset.key = ""; sync(); } }, 250);
   });
 })();
 
+/* marks: jump / delete (player page and #marks page) */
+function jumpMark(key, t) {
+  const r = BY_KEY.get(key); if (!r) return;
+  if (player.cur && player.cur.key === key && audio.getAttribute("src")) { audio.currentTime = t; audio.play().catch(() => {}); return; }
+  load(r, { resume: false });
+  audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); audio.currentTime = t; }, { once: true });
+}
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-mkgo]"); if (g) { jumpMark(g.dataset.mkgo, +g.dataset.t); return; }
+  const d = e.target.closest("[data-mkdel]"); if (d) {
+    const k = d.dataset.mkdel, t = +d.dataset.t; marks[k] = (marks[k] || []).filter(m => m.t !== t); if (!marks[k].length) delete marks[k];
+    saveMarks(); marksNav();
+    const dl = document.getElementById("infoDlg"); if (dl && dl.open && player.cur && player.cur.key === k) { const ev = new Event("mkrefresh"); dl.dispatchEvent(ev); }
+    if (d.dataset.pg) { const y = scrollY; route(); scrollTo(0, y); };
+  }
+});
 /* keyboard */
 addEventListener("keydown", e => {
   if (e.target.closest("input,textarea,select") && e.target.type !== "range") return;
@@ -1971,16 +2039,16 @@ document.addEventListener("click", async e => {
     setQueue(list, first.key); load(first); return; }
   const f = e.target.closest("[data-fav]");
   if (f) { const k = f.dataset.fav; favs.has(k) ? favs.delete(k) : favs.add(k); saveFav();
-    toast(favs.has(k) ? "أضيفت إلى المفضلة" : "أزيلت من المفضلة"); rerenderKeepScroll(); return; }
+    toast(favs.has(k) ? "أضيفت إلى المفضلة" : "أزيلت من المفضلة"); { const y = scrollY; route(); scrollTo(0, y); }; return; }
   const cb = e.target.closest("[data-card]");
   if (cb) { const r = BY_KEY.get(cb.dataset.card); if (r) openCard(r); return; }
   const gb = e.target.closest("[data-goal]");
-  if (gb) { goal = +gb.dataset.goal; store.set("goal", goal); rerenderKeepScroll(); toast(`وردك اليومي: ${AR(goal)} دقيقة`); return; }
+  if (gb) { goal = +gb.dataset.goal; store.set("goal", goal); { const y = scrollY; route(); scrollTo(0, y); }; toast(`وردك اليومي: ${AR(goal)} دقيقة`); return; }
   const lb = e.target.closest("[data-loc]");
   if (lb) { const cur = store.get("loc", null);
-    if (cur && cur.name !== "الرياض") { store.set("loc", null); rerenderKeepScroll(); return; }
+    if (cur && cur.name !== "الرياض") { store.set("loc", null); { const y = scrollY; route(); scrollTo(0, y); }; return; }
     if (!navigator.geolocation) { toast("المتصفح لا يدعم تحديد الموقع"); return; }
-    navigator.geolocation.getCurrentPosition(p => { store.set("loc", { lat: p.coords.latitude, lng: p.coords.longitude, name: "موقعك" }); rerenderKeepScroll(); toast("حُسبت المواقيت حسب موقعك"); },
+    navigator.geolocation.getCurrentPosition(p => { store.set("loc", { lat: p.coords.latitude, lng: p.coords.longitude, name: "موقعك" }); { const y = scrollY; route(); scrollTo(0, y); }; toast("حُسبت المواقيت حسب موقعك"); },
       () => toast("ما قدرنا نحدد موقعك، بقيت مواقيت الرياض"), { timeout: 10000 });
     return; }
   const ct = e.target.closest("[data-ct]");
@@ -1993,10 +2061,10 @@ document.addEventListener("click", async e => {
     if (ok) { s.classList.add("copied"); clearTimeout(s._ct); s._ct = setTimeout(() => s.classList.remove("copied"), 1800); if (navigator.vibrate) navigator.vibrate(12); }
     toast(ok ? "تم نسخ الرابط ✓" : link); return; }
   const sf = e.target.closest("[data-sf]");
-  if (sf) { surahFilter = sf.dataset.sf; rerenderKeepScroll(); return; }
+  if (sf) { surahFilter = sf.dataset.sf; { const y = scrollY; route(); scrollTo(0, y); }; return; }
   const rs = e.target.closest("[data-reset]");
   if (rs) { const c = COLLECTIONS.find(x => x.id === rs.dataset.reset);
-    if (rs.dataset.armed) { c.tracks.forEach(t => { done.delete(c.id + ":" + t.id); delete pos[c.id + ":" + t.id]; }); saveDone(); store.set("pos", pos); toast("بدأت ختمة جديدة"); rerenderKeepScroll(); }
+    if (rs.dataset.armed) { c.tracks.forEach(t => { done.delete(c.id + ":" + t.id); delete pos[c.id + ":" + t.id]; }); saveDone(); store.set("pos", pos); toast("بدأت ختمة جديدة"); { const y = scrollY; route(); scrollTo(0, y); }; }
     else { rs.dataset.armed = "1"; rs.textContent = "اضغط مرة أخرى للتأكيد"; setTimeout(() => { if (rs.isConnected) { delete rs.dataset.armed; rs.textContent = "إعادة الختمة"; } }, 3000); }
     return; }
 });
@@ -2006,7 +2074,7 @@ var extMode = false;
 function enableExt() {
   if (extMode) return; extMode = true; document.body.classList.add("pv");
   try { audio.pause(); audio.removeAttribute("src"); } catch {}
-  $("#extNote").hidden = false; rerenderKeepScroll();
+  $("#extNote").hidden = false; { const y = scrollY; route(); scrollTo(0, y); };
 }
 document.addEventListener("securitypolicyviolation", e => { if (/media/.test((e.effectiveDirective || "") + (e.violatedDirective || ""))) enableExt(); });
 if (window.self !== window.top) {
