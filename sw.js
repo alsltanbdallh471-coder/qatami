@@ -1,7 +1,7 @@
 /* Service worker: lets the site open and play saved recitations without internet. */
-const APP = "qtm-app-v1", AUD = "qtm-audio-v1";
+const APP = "qtm-app-v2", AUD = "qtm-audio-v1";
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(APP).then(c => Promise.all(["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"].map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(APP).then(c => Promise.all(["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./img/portrait.webp", "./img/door-ramadan.jpg", "./img/door-fard.jpg"].map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== APP && k !== AUD).map(k => caches.delete(k)))).then(() => self.clients.claim()));
