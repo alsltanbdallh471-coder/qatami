@@ -1003,6 +1003,40 @@ function surahCard(n) {
     <span class="dots" title="${AR(recs.length)} تسجيل">${recs.slice(0, 8).map(() => "<i></i>").join("")}</span></span></a>`;
 }
 
+let luxUid = 0;
+function luxMoon(night, big) {
+  const u = "lm" + (++luxUid), p = 0.07 + (Math.min(30, Math.max(1, night)) - 1) / 29 * 0.86;
+  const phase = n => { const k = Math.cos(2 * Math.PI * p), rx = (17 * Math.abs(k)).toFixed(2), cx = 50, cy = 41, r = 17;
+    return p < .5 ? `M${cx} ${cy - r}A${r} ${r} 0 0 1 ${cx} ${cy + r}A${rx} ${r} 0 0 ${k > 0 ? 0 : 1} ${cx} ${cy - r}Z` : `M${cx} ${cy - r}A${r} ${r} 0 0 0 ${cx} ${cy + r}A${rx} ${r} 0 0 ${k > 0 ? 1 : 0} ${cx} ${cy - r}Z`; };
+  const lit = phase();
+  const beads = Array.from({ length: 60 }, (_, i) => { const a = i * Math.PI / 30; return `<circle cx="${(50 + Math.cos(a) * 45.6).toFixed(2)}" cy="${(50 + Math.sin(a) * 45.6).toFixed(2)}" r=".55" fill="url(#${u}g)"/>`; }).join("");
+  const dia = [0, 1, 2, 3].map(i => { const a = i * Math.PI / 2 - Math.PI / 2, x = 50 + Math.cos(a) * 45.6, y = 50 + Math.sin(a) * 45.6; return `<rect x="${(x - 2.2).toFixed(2)}" y="${(y - 2.2).toFixed(2)}" width="4.4" height="4.4" transform="rotate(45 ${x.toFixed(2)} ${y.toFixed(2)})" fill="url(#${u}g)" stroke="#140e07" stroke-width=".5"/>`; }).join("");
+  const st = [[22, 30, 1.3, 0], [77, 24, 1, 1.2], [28, 60, .7, .6], [80, 56, 1.1, 2], [64, 15, .7, 1.6], [16, 46, .6, 2.4], [86, 40, .6, .3], [36, 18, .9, 1]];
+  const stars = st.map(([x, y, r, d]) => r > .95
+    ? `<path d="M${x} ${y - r * 2.6}Q${x} ${y} ${x + r * 2.6} ${y}Q${x} ${y} ${x} ${y + r * 2.6}Q${x} ${y} ${x - r * 2.6} ${y}Q${x} ${y} ${x} ${y - r * 2.6}Z" fill="#fbecc0"><animate attributeName="opacity" values=".35;1;.35" dur="3.2s" begin="${d}s" repeatCount="indefinite"/></path>`
+    : `<circle cx="${x}" cy="${y}" r="${r}" fill="#fbecc0"><animate attributeName="opacity" values=".2;.85;.2" dur="2.6s" begin="${d}s" repeatCount="indefinite"/></circle>`).join("");
+  const kh = (() => { let d = ""; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; d += `M5 5L${(5 + Math.cos(a) * 5).toFixed(2)} ${(5 + Math.sin(a) * 5).toFixed(2)}`; } return d; })();
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><defs>
+    <linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeab0"/><stop offset=".4" stop-color="#d9b25a"/><stop offset=".7" stop-color="#a77d2c"/><stop offset="1" stop-color="#f0d48a"/></linearGradient>
+    <radialGradient id="${u}s" cx=".5" cy=".36" r=".72"><stop offset="0" stop-color="#2c2417"/><stop offset=".6" stop-color="#15100a"/><stop offset="1" stop-color="#050304"/></radialGradient>
+    <radialGradient id="${u}m" cx=".36" cy=".32" r=".8"><stop offset="0" stop-color="#fffaf0"/><stop offset=".35" stop-color="#f6e2a6"/><stop offset=".75" stop-color="#d4ab52"/><stop offset="1" stop-color="#9c7428"/></radialGradient>
+    <radialGradient id="${u}h" cx=".5" cy=".41" r=".32"><stop offset="0" stop-color="#f7e3a1" stop-opacity="${(.12 + .3 * Math.sin(Math.PI * p)).toFixed(2)}"/><stop offset="1" stop-color="#f7e3a1" stop-opacity="0"/></radialGradient>
+    <filter id="${u}b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <pattern id="${u}p" width="10" height="10" patternUnits="userSpaceOnUse"><path d="${kh}" stroke="#c9a24b" stroke-width=".25" fill="none"/><rect x="2.5" y="2.5" width="5" height="5" transform="rotate(45 5 5)" fill="none" stroke="#c9a24b" stroke-width=".25"/></pattern>
+    <clipPath id="${u}c"><path d="${lit}"/></clipPath><clipPath id="${u}k"><circle cx="50" cy="50" r="42.6"/></clipPath>
+  </defs>
+  <circle cx="50" cy="50" r="49" fill="#140e07"/><circle cx="50" cy="50" r="48.4" fill="none" stroke="url(#${u}g)" stroke-width="1.4"/>${beads}<circle cx="50" cy="50" r="43.4" fill="none" stroke="url(#${u}g)" stroke-width=".8"/>
+  <circle cx="50" cy="50" r="42.6" fill="url(#${u}s)"/><g clip-path="url(#${u}k)"><rect width="100" height="100" fill="url(#${u}p)" opacity=".16"/><circle cx="50" cy="41" r="34" fill="url(#${u}h)"/></g>
+  ${stars}
+  <circle cx="50" cy="41" r="17" fill="#f7e3a1" opacity=".07"/><circle cx="50" cy="41" r="17" fill="none" stroke="#f7e3a1" stroke-opacity=".12" stroke-width=".4"/>
+  <path d="${lit}" fill="#f6dc8e" opacity=".55" filter="url(#${u}b)"/><path d="${lit}" fill="url(#${u}m)"/>
+  <g clip-path="url(#${u}c)" fill="#8f6a22" opacity=".16"><circle cx="44" cy="35" r="3.2"/><circle cx="55" cy="46" r="2.2"/><circle cx="47" cy="49" r="1.6"/><circle cx="58" cy="33" r="1.4"/><circle cx="40" cy="44" r="1.2"/></g>
+  <text x="50" y="66.5" text-anchor="middle" font-family="Amiri,serif" font-size="6.2" fill="#e9d29a">الليلة</text>
+  <path d="M33 72.6H45M55 72.6H67" stroke="url(#${u}g)" stroke-width=".5"/><rect x="48.6" y="71.2" width="2.8" height="2.8" transform="rotate(45 50 72.6)" fill="url(#${u}g)"/>
+  <text x="50" y="86" text-anchor="middle" font-family="Amiri,serif" font-size="14" font-weight="700" fill="url(#${u}g)">${AR(night)}</text>
+  ${dia}</svg>`;
+}
+const coverSVG = r => r && r.cat === "ramadan" && r.night ? luxMoon(r.night) : sealSVG(r && r.year || "✦", true);
 function sealSVG(y, f) {
   const P = (r, a) => [50 + Math.cos(a) * r, 50 + Math.sin(a) * r];
   const sq = rot => { let d = ""; for (let i = 0; i < 4; i++) { const [x, yy] = P(30, i * Math.PI / 2 + rot); d += (i ? "L" : "M") + x.toFixed(2) + " " + yy.toFixed(2); } return d + "Z"; };
@@ -2089,7 +2123,7 @@ function mediaSession(r) {
     const canOff = typeof OFF !== "undefined" && OFF.ok && !r.yt, saved = canOff && offSaved(r);
     dlg.innerHTML = `<div class="fph"><button class="icon-btn x" data-fpclose aria-label="إغلاق"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>التلاوة الآن</div>
     <div class="fpw">
-      <div class="art">${sealSVG(r.year || "✦", true)}</div>
+      <div class="art">${coverSVG(r)}</div>
       <h2 class="tt">${esc(r.title)}</h2>
       <div class="crumb">${esc(crumb)}${crumb ? "<br>" : ""}${esc(r.c.title)}</div>
       <div class="acts5">
@@ -2191,7 +2225,7 @@ function mediaSession(r) {
   }
   function open() {
     const r = player.cur; if (!r) return;
-    $q("qSeal").innerHTML = sealSVG(r.year || "✦", true); $q("qTitle").textContent = r.title;
+    $q("qSeal").innerHTML = coverSVG(r); $q("qTitle").textContent = r.title;
     $q("qSub").textContent = r.c.title + (r.year && r.c.multi ? " · " + yearLabel(r.year) : "");
     $q("qHint").hidden = false; paint(); d.showModal(); qm.classList.remove("show", "dim");
     clearTimeout(dimT); dimT = setTimeout(() => qm.classList.add("dim"), 8000);
