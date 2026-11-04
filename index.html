@@ -673,7 +673,7 @@ dialog.pldlg::backdrop{background:rgba(30,20,8,.55);backdrop-filter:blur(4px)}
 .plgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
 .plcard{display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:18px;border:1px solid var(--line-strong);background:var(--surface);text-decoration:none;color:inherit}
 .plcard small{color:var(--muted)}
-.instcard{display:flex;align-items:center;gap:12px;margin-top:18px;padding:14px 16px;border-radius:18px;border:1px solid #c9a24b;background:var(--gold-soft)}
+.instcard{display:flex;align-items:center;gap:12px;margin:18px 0 6px;padding:14px 16px;border-radius:18px;border:1px solid #c9a24b;background:var(--gold-soft)}
 .instcard>div{flex:1;min-width:0}.instcard small{display:block;color:var(--muted);font-size:.82rem;margin-top:2px}
 .bktxt{width:100%;margin:12px 0 8px;padding:12px;border-radius:14px;border:1px solid var(--line-strong);background:transparent;color:inherit;font:inherit;font-size:.85rem;box-sizing:border-box}
 </style>
@@ -1097,11 +1097,16 @@ window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferr
 window.addEventListener("appinstalled", () => { deferredInstall = null; store.set("instOk", 1); if (curRoute === "") route(); });
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-function installCard() {
-  if (isStandalone() || window.self !== window.top || store.get("instHide", 0) || !/^https?:$/.test(location.protocol)) return "";
-  if (!deferredInstall && !isIOS) return "";
-  return `<div class="instcard"><div><b>ثبّت الموقع كتطبيق</b><small>${deferredInstall ? "أيقونة على شاشتك، وتفتح بدون شريط المتصفح." : "اضغط زر المشاركة في سفاري، ثم «إضافة إلى الشاشة الرئيسية»."}</small></div>
-    ${deferredInstall ? `<button class="btn pri" data-install>تثبيت</button>` : ""}<button class="icon-btn" data-insthide aria-label="إخفاء">${icon("i-x")}</button></div>`;
+function installCard(always) {
+  if (isStandalone()) return always ? `<div class="instcard"><div><b>الموقع مثبّت كتطبيق ✓</b><small>تفتحه من أيقونته على شاشتك.</small></div></div>` : "";
+  if (!always && store.get("instHide", 0)) return "";
+  const framed = window.self !== window.top || !/^https?:$/.test(location.protocol) || !/github\.io$/.test(location.hostname);
+  const how = framed ? `افتح الموقع الرسمي في المتصفح، ثم ثبّته من هناك: <a href="https://alsltanbdallh471-coder.github.io/qatami/" target="_blank" rel="noopener">فتح الموقع</a>`
+    : deferredInstall ? "أيقونة على شاشتك، ويفتح بدون شريط المتصفح."
+    : isIOS ? "في سفاري: اضغط زر المشاركة ⬆︎ أسفل الشاشة، ثم «إضافة إلى الشاشة الرئيسية»، ثم «إضافة»."
+    : "من قائمة المتصفح ⋮ اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».";
+  return `<div class="instcard"><div><b>ثبّت الموقع كتطبيق</b><small>${how}</small></div>
+    ${deferredInstall && !framed ? `<button class="btn pri" data-install>تثبيت</button>` : ""}${always ? "" : `<button class="icon-btn" data-insthide aria-label="إخفاء">${icon("i-x")}</button>`}</div>`;
 }
 /* backup */
 const BK_KEYS = ["fav", "done", "pos", "marks", "lists", "goal", "lt", "speed", "theme", "last"];
@@ -1372,13 +1377,13 @@ const views = {
     <div class="orn"><i></i></div>`;
     const tp = todayPick(), todayCard = tp ? `<div class="resume todaypick" style="margin-top:24px"><button class="play" data-play="${esc(tp.r.key)}" aria-label="تشغيل تلاوة اليوم" style="margin:0">${icon("i-play")}</button>
       <div class="t"><small>${tp.why}</small><strong>${esc(tp.r.title)}</strong> <span class="note">· ${esc(tp.r.c.title)}${tp.r.year && tp.r.c.multi ? " · " + yearLabel(tp.r.year) : ""}</span></div></div>` : "";
-    const rest = `${todayCard}${installCard()}${lr ? `<div class="resume" style="margin-top:24px"><button class="play" data-play="${esc(lr.key)}" data-resume="1" aria-label="متابعة" style="margin:0">${icon("i-play")}</button>
+    const rest = `${todayCard}${lr ? `<div class="resume" style="margin-top:24px"><button class="play" data-play="${esc(lr.key)}" data-resume="1" aria-label="متابعة" style="margin:0">${icon("i-play")}</button>
       <div class="t"><small>تابع من حيث توقفت${pos[lr.key] ? " عند " + fmt(pos[lr.key]) : ""}</small><strong>${esc(lr.title)}</strong> <span class="note">· ${esc(lr.c.title)}</span></div></div>` : ""}
     <section class="today">${prayerPanel()}${wirdPanel()}</section>`;
     const doorsTop = `<section class="doors" style="margin-top:6px">${door("ramadan")}${door("fard")}</section>`;
     if (!ALL.length) return hero + rest + `<div class="empty" style="margin-top:24px">نرتّب التلاوات الآن، وتُضاف هنا قريبًا مقسّمة حسب السنين.</div>`;
     const gems = (COLLECTIONS.find(c => c.id === "gems") || { tracks: [] }).tracks.slice(0, 6).map(t => BY_KEY.get("gems:" + t.id)).filter(Boolean);
-    return hero + doorsTop + `
+    return hero + installCard() + doorsTop + `
     <section class="block">
       <div class="block-h"><h2>عبر السنين</h2></div>
       ${yearRail()}
@@ -1409,6 +1414,7 @@ const views = {
         <div class="panel"><div class="week">${days.map((d, i) => `<div><b>${AR(mins[i])}</b><i class="${mins[i] >= goal ? "hit" : ""} ${i === 6 ? "today" : ""}" style="height:${Math.max(3, mins[i] / max * 150)}px"></i>${WEEKDAYS[d.getDay()]}</div>`).join("")}</div>
         <p class="note" style="margin:10px 0 0">العمود الذهبي يعني أنك أتممت وردك ذلك اليوم.</p></div>
       </section>
+      <section class="block"><div class="block-h"><h2>التطبيق</h2></div>${installCard(true)}</section>
       <section class="block"><div class="block-h"><h2>نسخة احتياطية</h2></div>
         <p class="note" style="margin:0 0 10px">انقل تقدّمك وعلاماتك ومفضلتك وقوائمك بين جوالك وكمبيوترك: انسخ الرمز هنا، ثم الصقه في الجهاز الآخر. الاستعادة تدمج مع ما عندك ولا تمسح شيئًا.</p>
         <div class="toolbar"><button class="btn pri" id="bkCopy">نسخ الرمز</button><button class="btn" id="bkFile">تنزيل ملف</button><label class="btn" for="bkUp">رفع ملف</label><input id="bkUp" type="file" accept=".json,.txt" hidden></div>
