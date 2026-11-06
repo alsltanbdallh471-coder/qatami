@@ -1911,6 +1911,7 @@ function listFor(id) {
 
 /* ---------- player ---------- */
 const audio = $("#audio");
+(function syncPH() { const p = document.querySelector(".player"); if (!p) return; const f = () => { const h = Math.round(p.getBoundingClientRect().height); if (h > 40) document.documentElement.style.setProperty("--player-h", h + "px"); }; try { new ResizeObserver(f).observe(p); } catch {} addEventListener("resize", f); f(); })();
 const player = { cur: null, queue: [], idx: -1, order: [], shuffle: false, repeat: "off", sleep: null, sleepEnd: false };
 const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 let speed = store.get("speed", 1); audio.playbackRate = speed;
