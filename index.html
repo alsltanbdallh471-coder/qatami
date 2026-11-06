@@ -795,7 +795,7 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
       <a href="#" data-nav="home">الرئيسية</a>
       <a href="#ramadan" data-nav="ramadan">ليالي رمضان</a>
       <a href="#fard" data-nav="fard">الفروض</a>
-      <a href="#mushafs" data-nav="mushafs">المصاحف</a>
+      <a href="#mushafs" data-nav="mushafs">الإصدارات</a>
       <a href="#surahs" data-nav="surahs">السور</a>
       <a href="#stats" data-nav="stats">وِردي</a>
       <a href="#fav" data-nav="fav">المفضلة</a>
@@ -937,7 +937,38 @@ for (const c of COLLECTIONS) for (const t of c.tracks) {
 }
 const YEARS = [...new Set([...ALL.map(r => r.year), ...EXTERNAL.map(e => e.year)].filter(Boolean))].sort((a, b) => a - b);
 const FULL_YEARS = new Set(COLLECTIONS.filter(c => c.full && c.year).map(c => c.year));
-const BY_SURAH = range(114, n => ALL.filter(r => r.surah === n));
+/* which surahs each recording contains: from its surah index, else from its title */
+const SURAH_AT = new Map();
+const BY_SURAH = (() => {
+  const sn = s => s.replace(/[\u064B-\u065F\u0670\u0640]/g, "").replace(/[إأآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/[^\u0621-\u064A ]/g, " ").trim();
+  const strip = s => s.replace(/^ال/, "");
+  const NK = new Map(NAMES.map((x, i) => [strip(sn(x).replace(/\s+/g, "")), i + 1]));
+  const KEY = new Set(["سوره", "سورتا", "سورتي", "سور", "خواتيم", "فواتح", "مطلع", "تتمه", "اواخر", "اوائل", "اول", "اخر"]);
+  const find = text => {
+    const toks = sn(text).split(/\s+/).filter(Boolean), out = []; let on = false;
+    for (let i = 0; i < toks.length; i++) {
+      let w = toks[i]; if (KEY.has(w)) { on = true; continue; }
+      if (!on) continue;
+      if (w.length > 1 && w[0] === "و" && !NK.has(strip(w))) w = w.slice(1);
+      if (KEY.has(w)) continue;
+      let hit = null;
+      if (toks[i + 1] && NK.has(strip(w + toks[i + 1]))) { hit = NK.get(strip(w + toks[i + 1])); i++; }
+      else if (NK.has(strip(w))) hit = NK.get(strip(w));
+      if (hit) out.push(hit); else on = false;
+    }
+    return out;
+  };
+  const by = range(114, () => []);
+  for (const r of ALL) {
+    const found = new Map();
+    if (r.surah) found.set(r.surah, 0);
+    else if (r.t.idx) for (const [t, n, sub] of r.t.idx) for (const s of find(n)) if (!found.has(s)) found.set(s, t);
+    if (!found.size && !r.surah) for (const s of find(r.t.title || "")) if (!found.has(s)) found.set(s, 0);
+    for (const [s, t] of found) { by[s - 1].push(r); if (t > 5) SURAH_AT.set(s + "|" + r.key, t); }
+  }
+  return by;
+})();
+let curSurahN = 0;
 const MONTHS = ["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة","رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"];
 const PL = { clip: ["مقطع واحد", "مقطعان", "مقاطع", "مقطعًا"], night: ["ليلة واحدة", "ليلتان", "ليالٍ", "ليلة"], hour: ["ساعة", "ساعتان", "ساعات", "ساعة"],
   rec: ["تسجيل واحد", "تسجيلان", "تسجيلات", "تسجيلًا"], year: ["سنة", "سنتان", "سنوات", "سنة"] };
@@ -1007,7 +1038,9 @@ function trackRow(r, ctx) {
   const playing = player.cur && player.cur.key === r.key;
   const isFav = favs.has(r.key), isDone = done.has(r.key);
   const isSurahTitle = r.surah && !r.t.title;
+  const at = ctx === "surah" ? SURAH_AT.get(curSurahN + "|" + r.key) : 0;
   const sub = [];
+  if (at) sub.push(`<span class="tag r">تبدأ عند ${fmt(at)}</span>`);
   if (r.cat === "ramadan" && r.night) sub.push(`<span class="tag r">${r.nightTo ? "الليالي " + AR(r.night) + "–" + AR(r.nightTo) : "الليلة " + AR(r.night)}</span>`);
   else if (r.cat === "fard") sub.push(`<span class="tag f">${esc(r.prayer || "من الفروض")}${r.date ? " · " + AR(r.date[0]) + " " + MONTHS[r.date[1] - 1] : ""}</span>`);
   if (ctx !== "collection" && ctx !== "year") sub.push(esc(r.c.title));
@@ -1022,6 +1055,7 @@ function trackRow(r, ctx) {
   if (offSaved(r)) sub.push(`<span class="done">⤓ محمّلة</span>`);
   return `<li class="${playing ? "playing" : ""}" data-key="${esc(r.key)}">
     ${extMode ? `<a class="pbtn" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="استمع إلى ${esc(r.title)} في تبويب جديد">${icon("i-play")}</a>`
+      : at ? `<button class="pbtn" data-mkgo="${esc(r.key)}" data-t="${at}" aria-label="تشغيل من ${fmt(at)}">${icon("i-play")}</button>`
       : `<button class="pbtn" data-play="${esc(r.key)}" aria-label="تشغيل ${esc(r.title)}">${icon(playing && !audio.paused ? "i-pause" : "i-play")}</button>`}
     <div class="info"><span class="ttl ${isSurahTitle ? "" : "long"}">${esc(r.title)}</span>
       <span class="sub">${sub.join(" · ")}</span></div>
@@ -1539,7 +1573,7 @@ const views = {
     </section>
     ${rest}
     ${COLLECTIONS.some(c => !c.hide) ? `<section class="block">
-      <div class="block-h"><h2>المصاحف والإصدارات</h2><a class="link-more" href="#mushafs">عرض الكل</a></div>
+      <div class="block-h"><h2>الإصدارات</h2><a class="link-more" href="#mushafs">عرض الكل</a></div>
       <div class="grid-c">${COLLECTIONS.filter(c => !c.hide).slice(0, 4).map(collCard).join("")}</div>
     </section>` : ""}
     ${gems.length ? `<section class="block"><div class="block-h"><h2>روائع رمضانية</h2><a class="link-more" href="#c-gems">كل المختارات</a></div>${trackList(gems, "home")}</section>` : ""}
@@ -1574,8 +1608,8 @@ const views = {
         ${done.size ? trackList([...done].map(k => BY_KEY.get(k)).filter(Boolean).slice(-20).reverse(), "fav") : `<div class="empty">التلاوات اللي تسمعها لآخرها تظهر هنا.</div>`}</section>`;
   },
   mushafs() {
-    return `<div class="page-h"><div class="t"><h1>المصاحف والإصدارات</h1><p>كل مجموعة تحفظ تقدمك في الاستماع، فتعرف أين وصلت في ختمتك.</p></div></div>
-      ${COLLECTIONS.some(c => !c.hide) ? `<div class="grid-c">${COLLECTIONS.filter(c => !c.hide).map(collCard).join("")}</div>` : `<div class="empty">تُضاف المصاحف والإصدارات هنا قريبًا.</div>`}
+    return `<div class="page-h"><div class="t"><h1>الإصدارات</h1><p>كل مجموعة تحفظ تقدمك في الاستماع، فتعرف أين وصلت.</p></div></div>
+      ${COLLECTIONS.some(c => !c.hide) ? `<div class="grid-c">${COLLECTIONS.filter(c => !c.hide).map(collCard).join("")}</div>` : `<div class="empty">تُضاف الإصدارات هنا قريبًا.</div>`}
       ${EXTERNAL.length ? "" : "<!--"}<section class="block"><div class="block-h"><h2>تسجيلات على مواقع أخرى</h2><p>فيديو وملفات مضغوطة تُفتح في مصدرها</p></div>${extList(EXTERNAL)}</section>${EXTERNAL.length ? "" : "-->"}`;
   },
   surahs() {
@@ -1657,6 +1691,7 @@ const views = {
   },
   surah(n) {
     n = +n; if (!(n >= 1 && n <= 114)) return views.notfound();
+    curSurahN = n;
     const recs = [...BY_SURAH[n - 1]].sort((a, b) => (a.year || 9999) - (b.year || 9999));
     return `<div class="page-h"><span class="khatam big">${AR(n)}</span><div class="t">
         <h1>سورة ${NAMES[n - 1]}</h1><p>${MADANI.has(n) ? "مدنية" : "مكية"} · ${AR(AYAT[n - 1])} آية · ${AR(recs.length)} ${recs.length > 2 ? "تسجيلات" : "تسجيل"} بصوت الشيخ</p></div>
