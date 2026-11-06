@@ -465,6 +465,8 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 #vbox.mini{width:min(170px,44vw);border:1px solid #C9A24B;touch-action:none;cursor:grab}
 #vbox.mini .vbar{display:flex}
 #vbox.dragged{transform:none;bottom:auto}
+#vbox.full{position:fixed!important;inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;aspect-ratio:auto!important;transform:none!important;border-radius:0!important;border:0!important;z-index:300;animation:none}
+#vbox.full .vbar{padding-top:env(safe-area-inset-top,0px);height:calc(44px + env(safe-area-inset-top,0px))}
 .vbar{position:absolute;top:0;left:0;right:0;height:34px;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:0 6px;
   background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);cursor:grab;touch-action:none}
 .vbar:active{cursor:grabbing}
@@ -867,7 +869,7 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <button type="button" class="vtab" id="vtab" aria-label="إظهار المقطع" title="إظهار المقطع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>
 <div class="ytbox" id="vbox" hidden>
-  <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="تصغير" title="تصغير / تكبير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
+  <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="ملء الشاشة" title="ملء الشاشة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
   <video id="audio" preload="auto" playsinline controlsList="nodownload"></video></div>
 <div class="ytbox" id="ytbox" hidden><iframe id="ytf" title="مشغل يوتيوب" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
 <dialog class="pldlg" id="plDlg" aria-label="إضافة إلى قائمة"><div class="plw">
@@ -1966,7 +1968,7 @@ function closePlayer() {
 $("#pclose").addEventListener("click", closePlayer);
 $("#vclose").addEventListener("click", () => { const r = player.cur; if (r && r.vurl && VMODE.has(r.key)) { setVMode(r, false); toast("نكمل صوتياً"); } else closePlayer(); });
 function vReset() {
-  const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
+  const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged", "full"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
 }
 function vSnap() { const v = $("#vbox"); v.classList.add("snap"); setTimeout(() => v.classList.remove("snap"), 340); }
 function vMini(on) {
@@ -1981,7 +1983,19 @@ function vTuck(on) {
   if (on) { v.classList.add("tuck"); t.hidden = false; }
   else { v.classList.remove("tuck"); t.hidden = true; }
 }
-$("#vmini").addEventListener("click", () => vMini(!$("#vbox").classList.contains("mini")));
+function vFull(on) {
+  const v = $("#vbox");
+  if (on) {
+    v.classList.remove("mini", "dragged", "tuck"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
+    v.classList.add("full");
+    try { if (v.requestFullscreen) v.requestFullscreen().catch(() => {}); else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen(); } catch {}
+  } else {
+    v.classList.remove("full");
+    try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch {}
+  }
+}
+document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) $("#vbox").classList.remove("full"); });
+$("#vmini").addEventListener("click", () => vFull(!$("#vbox").classList.contains("full")));
 $("#vtab").addEventListener("click", () => { const v = $("#vbox"); v.style.left = "10px"; vTuck(false); });
 audio.addEventListener("click", () => { if ($("#vbox").classList.contains("mini") && !vMoved) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
 let vMoved = false;
