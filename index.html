@@ -475,6 +475,19 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 .vbar .grip{width:36px;height:4px;border-radius:4px;background:rgba(255,255,255,.55)}
 #vbox.mini .vbar{height:28px}#vbox.mini .vbar button{width:22px;height:22px}#vbox.mini .vbar button svg{width:12px;height:12px}
 .ytbox video{width:100%;height:100%;display:block;background:#000;object-fit:contain}
+.vload{position:absolute;inset:0;z-index:4;display:grid;place-content:center;justify-items:center;gap:6px;padding:16px;text-align:center;color:#F5E2AC;
+  background:radial-gradient(circle at 50% 45%,rgba(20,14,6,.55),rgba(8,5,2,.82));font-family:var(--f-ui);pointer-events:none;transition:opacity .3s}
+.vload[hidden]{display:none!important}
+.vload b{font-size:.95rem;font-weight:600}
+.vload small{font-size:.76rem;opacity:.8;max-width:30ch;line-height:1.6}
+.vload .spin{width:30px;height:30px;border-radius:50%;border:2.5px solid rgba(227,195,106,.25);border-top-color:#E3C36A;animation:vspin .9s linear infinite}
+@keyframes vspin{to{transform:rotate(360deg)}}
+.vlact{display:flex;gap:8px;margin-top:6px;pointer-events:auto}
+.vlact[hidden]{display:none}
+.vlact button,.perr button{font:inherit;font-size:.8rem;font-weight:600;border-radius:999px;padding:6px 14px;cursor:pointer;border:1px solid #C9A24B;background:rgba(0,0,0,.35);color:#F5E2AC}
+.vlact button.pri{background:#C9A24B;color:#1A1209;border-color:transparent}
+#vbox.mini .vload small,#vbox.mini .vlact{display:none}
+@media (prefers-reduced-motion:reduce){.vload .spin{animation-duration:2.4s}}
 
 /* photo doors (home) */
 .door.ph{isolation:isolate;padding-top:92px;border:1.5px solid var(--gold);color:#f6efdc;background:#241706;box-shadow:0 12px 28px rgba(36,23,6,.3)}
@@ -870,7 +883,8 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
 <button type="button" class="vtab" id="vtab" aria-label="إظهار المقطع" title="إظهار المقطع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>
 <div class="ytbox" id="vbox" hidden>
   <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="ملء الشاشة" title="ملء الشاشة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
-  <video id="audio" preload="auto" playsinline controlsList="nodownload"></video></div>
+  <video id="audio" preload="auto" playsinline webkit-playsinline controlsList="nodownload"></video>
+  <div class="vload" id="vload" hidden><span class="spin" aria-hidden="true"></span><b id="vloadT">جارٍ تحميل المقطع المرئي…</b><small id="vloadS"></small><div class="vlact" id="vlact" hidden><button type="button" class="pri" data-vl="audio">أكمل بالصوت</button><button type="button" data-vl="retry">حاول مرة ثانية</button></div></div></div>
 <div class="ytbox" id="ytbox" hidden><iframe id="ytf" title="مشغل يوتيوب" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
 <dialog class="pldlg" id="plDlg" aria-label="إضافة إلى قائمة"><div class="plw">
   <div class="plh"><h3 class="goldtxt">أضف إلى قائمة</h3><button class="icon-btn" id="plClose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24"><use href="#i-x"/></svg></button></div>
@@ -1942,7 +1956,7 @@ function load(r, { resume = true, autoplay = true, fade = false } = {}) {
   const useYt = !!r.yt;
   if (useYt && (extMode || window.self !== window.top)) { window.open(r.url, "_blank", "noopener"); return; }
   if (useYt) { audio.pause(); audio.removeAttribute("src"); $("#vbox").hidden = true; ytShow(r, autoplay); }
-  else { ytHide(); vReset(); const V = asVid(r); $("#vbox").hidden = !V; audio.controls = V; audio.src = V && r.vurl ? r.vurl : r.url; audio.playbackRate = speed; }
+  else { ytHide(); vReset(); const V = asVid(r); $("#vbox").hidden = !V; audio.controls = V && !IOS; if (V && r.vurl) audio.poster = vPoster(r); else audio.removeAttribute("poster"); audio.src = V && r.vurl ? r.vurl : r.url; audio.playbackRate = speed; vLoading(V && autoplay); }
   const start = resume && pos[r.key] > 5 && !done.has(r.key) ? pos[r.key] : 0;
   audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (start && start < audio.duration - 3) { audio.currentTime = start; toast("نكمل من " + fmt(start)); } }, { once: true });
   store.set("last", { key: r.key });
@@ -1969,7 +1983,7 @@ function closePlayer() {
 $("#pclose").addEventListener("click", closePlayer);
 $("#vclose").addEventListener("click", () => { const r = player.cur; if (r && r.vurl && VMODE.has(r.key)) { setVMode(r, false); toast("نكمل صوتياً"); } else closePlayer(); });
 function vReset() {
-  const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged", "full"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
+  const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged", "full"); v.style.left = ""; v.style.top = ""; audio.controls = !IOS; $("#vtab").hidden = true;
 }
 function vSnap() { const v = $("#vbox"); v.classList.add("snap"); setTimeout(() => v.classList.remove("snap"), 340); }
 function vMini(on) {
@@ -1987,7 +2001,7 @@ function vTuck(on) {
 function vFull(on) {
   const v = $("#vbox");
   if (on) {
-    v.classList.remove("mini", "dragged", "tuck"); v.style.left = ""; v.style.top = ""; audio.controls = true; $("#vtab").hidden = true;
+    v.classList.remove("mini", "dragged", "tuck"); v.style.left = ""; v.style.top = ""; audio.controls = !IOS; $("#vtab").hidden = true;
     v.classList.add("full");
     try { if (v.requestFullscreen) v.requestFullscreen().catch(() => {}); else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen(); } catch {}
   } else {
@@ -1998,7 +2012,40 @@ function vFull(on) {
 document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) $("#vbox").classList.remove("full"); });
 $("#vmini").addEventListener("click", () => vFull(!$("#vbox").classList.contains("full")));
 $("#vtab").addEventListener("click", () => { const v = $("#vbox"); v.style.left = "10px"; vTuck(false); });
-audio.addEventListener("click", () => { if ($("#vbox").classList.contains("mini") && !vMoved) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
+audio.addEventListener("click", () => { if (($("#vbox").classList.contains("mini") || !audio.controls) && !vMoved) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
+
+/* ---------- video: stay inside the page on iPhone, and show progress while it loads ---------- */
+/* iPhone and iPad: the native control bar has a full-screen button that takes the video out of the page.
+   Without it, the site's own bar controls playback, ⤢ fills the window inside the page, and a tap plays or pauses. */
+var IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (IOS) audio.controls = false;
+function vPoster(r) { const m = /archive\.org\/download\/([^/]+)\//.exec(r.vurl || ""); return m ? "https://archive.org/services/img/" + m[1] : ""; }
+var vlT = 0;
+function vLoading(on, slowText) {
+  const L = $("#vload"); clearTimeout(vlT);
+  if (!on) { L.hidden = true; return; }
+  L.hidden = false; $("#vlact").hidden = true;
+  $("#vloadT").textContent = "جارٍ تحميل المقطع المرئي…";
+  $("#vloadS").textContent = "المقاطع المرئية أكبر من الصوتية، فأول تشغيل قد يأخذ عدة ثوانٍ.";
+  vlT = setTimeout(() => {
+    if (L.hidden) return;
+    $("#vloadT").textContent = "المقطع بطيء في التحميل";
+    $("#vloadS").textContent = slowText || "الاتصال بمصدر المقطع بطيء الحين. تقدر تكمل بالصوت من نفس المكان، أو تنتظر شوي.";
+    $("#vlact").hidden = false;
+  }, 15000);
+}
+audio.addEventListener("waiting", () => { if (player.cur && asVid(player.cur) && !audio.paused) vLoading(true); });
+audio.addEventListener("playing", () => vLoading(false));
+audio.addEventListener("canplay", () => { if (audio.paused) vLoading(false); });
+audio.addEventListener("pause", () => { if (audio.readyState >= 2) vLoading(false); });
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-vl]"); if (!b || !player.cur) return;
+  e.stopPropagation(); const r = player.cur;
+  if (b.dataset.vl === "audio") { vLoading(false); hideErr(); setVMode(r, false); toast("نكمل صوتياً"); return; }
+  const t = audio.currentTime; hideErr(); vLoading(true);
+  audio.load(); audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (t > 1) audio.currentTime = t; }, { once: true });
+  audio.play().catch(() => {});
+});
 let vMoved = false;
 (function () {
   const box = $("#vbox"); let sx, sy, ox, oy, on = false;
@@ -2092,6 +2139,7 @@ function showErr() {
     e.innerHTML = `<span>لا يوجد اتصال بالإنترنت، فما يمدي تشغيل هذي التلاوة الحين. التلاوات اللي حفظتها داخل الموقع تشتغل بدون نت (تجدها في «المحمّل»)، وللحفظ اضغط ⤓ وأنت متصل.</span>`;
     e.hidden = false; return;
   }
+  if (asVid(r)) { vLoading(false); e.innerHTML = `<span>تعذّر تشغيل المقطع المرئي الحين.</span><button type="button" data-vl="audio">أكمل بالصوت</button><button type="button" data-vl="retry">حاول مرة ثانية</button>`; e.hidden = false; return; }
   e.innerHTML = `<span>تعذّر تشغيل الملف هنا (بعض نوافذ المعاينة تمنع الصوت من مواقع خارجية).</span><a href="${esc(r.url)}" target="_blank" rel="noopener">افتح الملف مباشرة</a><a href="${esc(r.fb)}" target="_blank" rel="noopener">صفحة المصدر</a>`;
   e.hidden = false;
 }
