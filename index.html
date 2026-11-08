@@ -672,6 +672,17 @@ a,button,.yk,.door,.row{transition:transform .28s var(--soft),opacity .28s var(-
 .fp .mklist .go svg{width:16px;height:16px}.fp .mklist .go b{font-variant-numeric:tabular-nums}
 .fp .mkn{flex:1;min-width:0;border:0;background:transparent;color:inherit;font:inherit;font-size:.95rem;padding:8px 4px;outline:none;border-bottom:1px dashed color-mix(in srgb,#c9a24b 45%,transparent)}
 .mkpage .pbtn{flex:none}
+/* marks: no overflow + press feedback */
+.fp .mklist{grid-template-columns:minmax(0,1fr)}
+.fp .mklist li{min-width:0;transition:border-color .15s,box-shadow .15s,background .15s,transform .12s;-webkit-tap-highlight-color:transparent}
+.fp .mkn{width:0;flex:1 1 0}
+.fp .mklist li:focus-within{border-color:#c9a24b;box-shadow:0 0 0 3px rgba(201,162,75,.28);background:color-mix(in srgb,#c9a24b 10%,transparent)}
+.fp .mklist li:active{transform:scale(.985);background:color-mix(in srgb,#c9a24b 14%,transparent)}
+.fp .mkn:focus{border-bottom:1.5px solid #c9a24b}
+.fp .mklist li.tap{animation:mktap .35s ease-out}
+@keyframes mktap{0%{box-shadow:0 0 0 0 rgba(201,162,75,.55)}100%{box-shadow:0 0 0 10px rgba(201,162,75,0)}}
+.fp .mklist .go:active,.fp .mklist .icon-btn:active{transform:scale(.9)}
+
 /* iOS-no-zoom: inputs under 16px make iPhone zoom the page on focus */
 .fp .mkn,.mkpage input,dialog input[type=text],dialog input:not([type]),dialog textarea,.search input,.plnew input,#cardText,.bktxt{font-size:16px}
 /* v10 */
@@ -2714,6 +2725,11 @@ const last = store.get("last", null), lr = last && BY_KEY.get(last.key);
 if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.key); player.cur = lr;
   $("#nowTitle").textContent = lr.title; $("#nowSub").textContent = lr.c.title + (pos[lr.key] > 5 ? " · توقفت عند " + fmt(pos[lr.key]) : "");
   $("#nowNum").textContent = lr.surah ? AR(lr.surah) : "✦"; mediaSession(lr); }
+})();
+
+(function(){ const ul=document.getElementById("infoDlg"); if(!ul) return;
+  ul.addEventListener("pointerdown", e => { const li=e.target.closest(".mklist li"); if(!li) return; li.classList.remove("tap"); void li.offsetWidth; li.classList.add("tap"); try{ navigator.vibrate && navigator.vibrate(8); }catch{} setTimeout(()=>li.classList.remove("tap"),400); });
+  ul.addEventListener("click", e => { const li=e.target.closest(".mklist li"); if(!li || e.target.closest("button,input")) return; const i=li.querySelector(".mkn"); if(i) i.focus(); });
 })();
 </script>
 
