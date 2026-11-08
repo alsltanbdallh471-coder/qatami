@@ -672,6 +672,8 @@ a,button,.yk,.door,.row{transition:transform .28s var(--soft),opacity .28s var(-
 .fp .mklist .go svg{width:16px;height:16px}.fp .mklist .go b{font-variant-numeric:tabular-nums}
 .fp .mkn{flex:1;min-width:0;border:0;background:transparent;color:inherit;font:inherit;font-size:.95rem;padding:8px 4px;outline:none;border-bottom:1px dashed color-mix(in srgb,#c9a24b 45%,transparent)}
 .mkpage .pbtn{flex:none}
+/* iOS-no-zoom: inputs under 16px make iPhone zoom the page on focus */
+.fp .mkn,.mkpage input,dialog input[type=text],dialog input:not([type]),dialog textarea,.search input,.plnew input,#cardText,.bktxt{font-size:16px}
 /* v10 */
 .mkrow{display:flex;gap:8px;margin-top:14px}.mkrow .mkadd{margin-top:0;flex:1}
 .fp .mkpl{display:flex;align-items:center;gap:6px;min-height:52px;padding:0 18px;border-radius:999px;border:1.5px solid color-mix(in srgb,#c9a24b 55%,transparent);background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer;touch-action:manipulation}
