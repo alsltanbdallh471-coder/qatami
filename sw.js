@@ -22,9 +22,17 @@ async function audio(req) {
   if (s > e) return new Response(null, { status: 416, headers: { "Content-Range": "bytes */" + size } });
   return new Response(blob.slice(s, e + 1), { status: 206, headers: { "Content-Type": type, "Content-Range": `bytes ${s}-${e}/${size}`, "Content-Length": String(e - s + 1), "Accept-Ranges": "bytes" } });
 }
+/* Only files saved for offline go through here. Anything else streams straight from its host:
+   passing a streamed video through the worker breaks it when the file's index sits at its end. */
+let SAVED = null;
+function loadSaved() { return caches.open(AUD).then(c => c.keys()).then(ks => { SAVED = new Set(ks.map(k => k.url)); }).catch(() => {}); }
+loadSaved();
+self.addEventListener("message", e => { if (e.data === "saved-changed") loadSaved(); });
 self.addEventListener("fetch", e => {
   const req = e.request; if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (req.mode === "navigate") { e.respondWith(page(req)); return; }
-  if (/\.(mp3|mp4|m4a)$/i.test(url.pathname)) e.respondWith(audio(req));
+  if (!/\.(mp3|mp4|m4a)$/i.test(url.pathname)) return;
+  if (!SAVED || SAVED.has(req.url) || !self.navigator.onLine) e.respondWith(audio(req));
+  else e.waitUntil(loadSaved());
 });
