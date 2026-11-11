@@ -2288,6 +2288,57 @@ document.addEventListener("click", e => {
   audio.load(); audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (t > 1) audio.currentTime = t; }, { once: true });
   audio.play().catch(() => {});
 });
+/* ---------- visit statistics (GoatCounter: no cookies, no personal data) ---------- */
+/* counted: page views, plays per recitation, minutes actually listened, and a few feature taps */
+const STAT = { q: [], ready: false };
+function stat(path, title) {
+  try {
+    if (STAT.ready && window.goatcounter && goatcounter.count) goatcounter.count({ path, title: title || path, event: true });
+    else STAT.q.push([path, title]);
+  } catch {}
+}
+function statView() {
+  try {
+    const o = { path: "/" + (location.hash || "#").slice(1), title: document.title };
+    if (STAT.ready && window.goatcounter && goatcounter.count) goatcounter.count(o); else STAT.q.push(["view", o]);
+  } catch {}
+}
+(function () {
+  try {
+    const sc = document.createElement("script");
+    sc.async = true; sc.src = "https://gc.zgo.at/count.js";
+    sc.dataset.goatcounter = "https://qatami.goatcounter.com/count";
+    sc.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
+    sc.onload = () => { STAT.ready = true; STAT.q.splice(0).forEach(([a, b]) => { try { a === "view" ? goatcounter.count(b) : goatcounter.count({ path: a, title: b || a, event: true }); } catch {} }); };
+    document.head.appendChild(sc);
+  } catch {}
+  statView(); addEventListener("hashchange", () => setTimeout(statView, 60));
+  /* plays: once each time a recitation starts */
+  let last = "", acc = 0, lastT = 0;
+  audio.addEventListener("playing", () => {
+    const r = player.cur; if (!r) return;
+    lastT = audio.currentTime;
+    if (last !== r.key) { last = r.key; acc = 0; stat("play/" + r.key, r.title); stat(asVid(r) ? "mode/video" : "mode/audio", r.key); }
+  });
+  /* listening time: one event for every full minute heard (seeking forward does not count) */
+  audio.addEventListener("timeupdate", () => {
+    const r = player.cur; if (!r || audio.paused) return;
+    const d = audio.currentTime - lastT; lastT = audio.currentTime;
+    if (d > 0 && d < 3) { acc += d; if (acc >= 60) { acc -= 60; stat("min/" + r.key, r.title); } }
+  });
+  audio.addEventListener("seeked", () => { lastT = audio.currentTime; });
+  audio.addEventListener("error", () => { const r = player.cur; if (r) stat("err/" + r.key, r.title); });
+  audio.addEventListener("ended", () => { const r = player.cur; if (r) stat("end/" + r.key, r.title); });
+  /* feature taps */
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-fav],[data-off],[data-card],[data-share],[data-pl],[data-vmode],#tourBtn,#sleepBtn,#themeBtn");
+    if (!t) return;
+    const n = t.hasAttribute("data-fav") ? "fav" : t.hasAttribute("data-off") ? "offline" : t.hasAttribute("data-card") ? "card" : t.hasAttribute("data-share") ? "share"
+      : t.hasAttribute("data-pl") ? "list" : t.hasAttribute("data-vmode") ? "video-tag" : t.id === "tourBtn" ? "tour-open" : t.id === "sleepBtn" ? "sleep-timer" : "theme";
+    stat("feature/" + n, n);
+  }, true);
+})();
+
 /* ---------- faster start: warm up the file on touch, and the next one after play ---------- */
 const warm = new Map();
 function warmUp(url) {
@@ -3368,7 +3419,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
   }
   function listen(){var p=$(".todaypick [data-play]");end();if(p)setTimeout(function(){p.click()},250)}
   function again(){teardown();setTimeout(welcome,RM?0:720)}
-  function end(){LS.set("done");teardown()}
+  function end(){LS.set("done");try{typeof stat==="function"&&stat("tour/"+(cur===-2?"finished":cur>=0?"skipped-at-"+(cur+1):"closed"))}catch(e){}teardown()}
 
   function addButton(){
     var th=$("#themeBtn");if(!th||$("#tourBtn"))return;
