@@ -488,6 +488,67 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 .vlact button.pri{background:#C9A24B;color:#1A1209;border-color:transparent}
 #vbox.mini .vload small,#vbox.mini .vlact{display:none}
 @media (prefers-reduced-motion:reduce){.vload .spin{animation-duration:2.4s}}
+/* ---------- video player, YouTube-style ---------- */
+#vbox{--vp:0;--vb:0}
+#vbox video{position:absolute;inset:0}
+.vtap{position:absolute;inset:0;z-index:2;-webkit-tap-highlight-color:transparent;cursor:pointer;overflow:hidden}
+.vrip{position:absolute;top:-20%;bottom:-20%;width:46%;display:grid;place-content:center;justify-items:center;gap:4px;color:#fff;opacity:0;transition:opacity .25s;pointer-events:none;font-family:var(--f-ui)}
+.vrip.r{right:0;border-radius:50% 0 0 50%;background:rgba(255,255,255,.14)}
+.vrip.l{left:0;border-radius:0 50% 50% 0;background:rgba(255,255,255,.14)}
+.vrip.on{opacity:1}
+.vrip i{width:26px;height:16px;background:currentColor;clip-path:polygon(0 50%,45% 0,45% 100%,50% 50%,95% 0,95% 100%)}
+.vrip.l i{transform:scaleX(-1)}
+.vrip b{font-size:.8rem;font-weight:600}
+.vui{position:absolute;inset:0;z-index:3;display:grid;grid-template-rows:auto 1fr auto;color:#fff;font-family:var(--f-ui);opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .2s;
+  background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,.18) 32%,rgba(0,0,0,.18) 62%,rgba(0,0,0,.72));pointer-events:none}
+#vbox.ui .vui{opacity:1;visibility:visible;transition:opacity .2s}
+#vbox.ui .vui button{pointer-events:auto}
+.vui button{border:0;background:none;color:#fff;cursor:pointer;padding:0;display:grid;place-items:center;-webkit-tap-highlight-color:transparent;font:inherit}
+.vtopr{display:flex;align-items:center;gap:6px;padding:6px 8px;min-width:0}
+.vtopr button{width:36px;height:36px;border-radius:50%;flex:none}
+.vtopr button svg{width:18px;height:18px}
+.vttl{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.vmid{display:flex;align-items:center;justify-content:center;gap:clamp(28px,11vw,64px)}
+.vpp{width:62px;height:62px;border-radius:50%!important;background:rgba(0,0,0,.42)!important;transition:transform .12s}
+.vpp:active,.vskip:active{transform:scale(.9)}
+.vpp svg{width:30px;height:30px}
+.vpp .i-pa,#vbox.playing .vpp .i-pl{display:none}#vbox.playing .vpp .i-pa{display:block}
+.vskip{position:relative;width:46px;height:46px;border-radius:50%;transition:transform .12s}
+.vskip svg{width:34px;height:34px}
+.vskip span{position:absolute;inset:0;display:grid;place-items:center;font-size:.74rem;font-weight:800;padding-top:4px}
+.vbot{display:flex;align-items:center;gap:4px;padding:0 10px 14px}
+.vtime{font-size:.78rem;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(0,0,0,.6);opacity:.95}
+.vtime b{font-weight:600}.vtime b,.vtime span{direction:ltr;unicode-bidi:isolate}
+.vbot .sp{flex:1}
+.vbot button{width:38px;height:34px;border-radius:8px}
+.vbot button svg{width:22px;height:22px}
+.vspd{font-size:.8rem!important;font-weight:700!important;width:auto!important;padding:0 8px!important}
+#vfs .i-out,#vbox.full #vfs .i-in{display:none}#vbox.full #vfs .i-out{display:block}
+.vseek{position:absolute;left:0;right:0;bottom:0;height:22px;z-index:4;display:flex;align-items:flex-end;touch-action:none;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none}
+.vtrack{position:relative;width:100%;height:3px;background:rgba(255,255,255,.28);transition:height .15s}
+.vtrack i{position:absolute;top:0;bottom:0;right:0}
+.vbuf{width:calc(var(--vb)*100%);background:rgba(255,255,255,.45)}
+.vplayed{width:calc(var(--vp)*100%);background:#E3C36A}
+.vthumb{position:absolute;bottom:-5px;right:calc(var(--vp)*100%);width:13px;height:13px;margin-right:-6.5px;border-radius:50%;background:#E3C36A;box-shadow:0 0 0 3px rgba(227,195,106,.25);transform:scale(0);transition:transform .15s;pointer-events:none}
+#vbox.ui .vthumb,#vbox.drag .vthumb{transform:scale(1)}
+#vbox.ui .vtrack,#vbox.drag .vtrack{height:4px}
+#vbox.drag .vthumb{transform:scale(1.35)}
+#vbox:not(.ui):not(.drag) .vseek{pointer-events:none}
+#vbox.full .vbot{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+#vbox.full .vtopr{padding-top:calc(6px + env(safe-area-inset-top,0px))}
+#vbox.full .vseek{bottom:env(safe-area-inset-bottom,0px)}
+#vbox .vload{z-index:5}
+#vbox .vload b,#vbox .vload small{text-shadow:0 1px 3px rgba(0,0,0,.6)}
+/* phones: the video sits at the top of the screen and the page scrolls under it, like YouTube */
+@media (max-width:760px){
+  body.vdock{--vdh:min(56.25vw,62vh);padding-top:calc(var(--vdh) + env(safe-area-inset-top,0px))}
+  body.vdock header.top,body.vdock .navbar{top:calc(var(--vdh) + env(safe-area-inset-top,0px))}
+  body.vdock #vbox:not(.full),body.vdock #ytbox{top:0;bottom:auto;left:0;right:0;width:100%;height:calc(var(--vdh) + env(safe-area-inset-top,0px));aspect-ratio:auto;transform:none;translate:none;
+    border-radius:0;border-top:env(safe-area-inset-top,0px) solid #000;box-sizing:border-box;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:42}
+  body.vdock #vbox:not([hidden]):not(.full),body.vdock #ytbox:not([hidden]){animation:vdrop .28s cubic-bezier(.2,.8,.2,1)}
+}
+@keyframes vdrop{from{opacity:0;translate:0 -24px}to{opacity:1;translate:0 0}}
+
 
 /* photo doors (home) */
 .door.ph{isolation:isolate;padding-top:92px;border:1.5px solid var(--gold);color:#f6efdc;background:#241706;box-shadow:0 12px 28px rgba(36,23,6,.3)}
@@ -895,9 +956,20 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <button type="button" class="vtab" id="vtab" aria-label="إظهار المقطع" title="إظهار المقطع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>
 <div class="ytbox" id="vbox" hidden>
-  <div class="vbar" id="vbar"><button type="button" id="vclose" aria-label="إغلاق" title="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="grip" aria-hidden="true"></span><button type="button" id="vmini" aria-label="ملء الشاشة" title="ملء الشاشة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button></div>
   <video id="audio" preload="auto" playsinline webkit-playsinline controlsList="nodownload"></video>
+  <div class="vtap" id="vtap" aria-hidden="true"><span class="vrip r" id="vripR"><i></i><b></b></span><span class="vrip l" id="vripL"><i></i><b></b></span></div>
+  <div class="vui" id="vui">
+    <div class="vtopr"><button type="button" id="vclose" aria-label="الرجوع للصوت" title="الرجوع للصوت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="vttl" id="vttl"></span></div>
+    <div class="vmid">
+      <button type="button" class="vskip" data-vskip="-10" aria-label="رجوع ١٠ ثوانٍ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/><path d="M23 4v6h-6"/></svg><span>١٠</span></button>
+      <button type="button" class="vpp" id="vpp" aria-label="تشغيل"><svg class="i-pl" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pa" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></svg></button>
+      <button type="button" class="vskip" data-vskip="10" aria-label="تقديم ١٠ ثوانٍ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/><path d="M1 4v6h6"/></svg><span>١٠</span></button>
+    </div>
+    <div class="vbot"><span class="vtime"><b id="vcur">0:00</b> / <span id="vdur">0:00</span></span><span class="sp"></span><button type="button" id="vspd" class="vspd" aria-label="سرعة التشغيل">١×</button><button type="button" id="vfs" aria-label="ملء الشاشة" title="ملء الشاشة"><svg class="i-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="i-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button></div>
+  </div>
+  <div class="vseek" id="vseek" role="slider" aria-label="موضع المقطع" tabindex="0"><div class="vtrack"><i class="vbuf" id="vbuf"></i><i class="vplayed" id="vplayed"></i></div><i class="vthumb" id="vthumb"></i></div>
   <div class="vload" id="vload" hidden><span class="spin" aria-hidden="true"></span><b id="vloadT">جارٍ تحميل المقطع المرئي…</b><small id="vloadS"></small><div class="vlact" id="vlact" hidden><button type="button" class="pri" data-vl="audio">أكمل بالصوت</button><button type="button" data-vl="retry">حاول مرة ثانية</button></div></div></div>
+</div>
 <div class="ytbox" id="ytbox" hidden><iframe id="ytf" title="مشغل يوتيوب" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
 <dialog class="pldlg" id="plDlg" aria-label="إضافة إلى قائمة"><div class="plw">
   <div class="plh"><h3 class="goldtxt">أضف إلى قائمة</h3><button class="icon-btn" id="plClose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24"><use href="#i-x"/></svg></button></div>
@@ -1970,7 +2042,7 @@ function load(r, { resume = true, autoplay = true, fade = false } = {}) {
   const useYt = !!r.yt;
   if (useYt && (extMode || window.self !== window.top)) { window.open(r.url, "_blank", "noopener"); return; }
   if (useYt) { audio.pause(); audio.removeAttribute("src"); $("#vbox").hidden = true; ytShow(r, autoplay); }
-  else { ytHide(); vReset(); const V = asVid(r); $("#vbox").hidden = !V; audio.controls = V && !IOS; if (V && r.vurl) audio.poster = vPoster(r); else audio.removeAttribute("poster"); audio.src = V && r.vurl ? r.vurl : r.url; audio.playbackRate = speed; vLoading(V && autoplay); }
+  else { ytHide(); vReset(); const V = asVid(r); $("#vbox").hidden = !V; audio.controls = false; $("#vttl").textContent = r.title; if (V && r.vurl) audio.poster = vPoster(r); else audio.removeAttribute("poster"); audio.src = V && r.vurl ? r.vurl : r.url; audio.playbackRate = speed; vLoading(V && autoplay); }
   const start = resume && pos[r.key] > 5 && !done.has(r.key) ? pos[r.key] : 0;
   audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (start && start < audio.duration - 3) { audio.currentTime = start; toast("نكمل من " + fmt(start)); } }, { once: true });
   store.set("last", { key: r.key });
@@ -1997,7 +2069,7 @@ function closePlayer() {
 $("#pclose").addEventListener("click", closePlayer);
 $("#vclose").addEventListener("click", () => { const r = player.cur; if (r && r.vurl && VMODE.has(r.key)) { setVMode(r, false); toast("نكمل صوتياً"); } else closePlayer(); });
 function vReset() {
-  const v = $("#vbox"); v.classList.remove("tuck", "mini", "dragged", "full"); v.style.left = ""; v.style.top = ""; audio.controls = !IOS; $("#vtab").hidden = true;
+  const v = $("#vbox"); if (v.classList.contains("full")) vFull(false); v.classList.remove("tuck", "mini", "dragged", "full"); v.style.left = ""; v.style.top = ""; audio.controls = false; $("#vtab").hidden = true; vUi(true);
 }
 function vSnap() { const v = $("#vbox"); v.classList.add("snap"); setTimeout(() => v.classList.remove("snap"), 340); }
 function vMini(on) {
@@ -2013,26 +2085,94 @@ function vTuck(on) {
   else { v.classList.remove("tuck"); t.hidden = true; }
 }
 function vFull(on) {
-  const v = $("#vbox");
+  const v = $("#vbox"), fsEl = document.fullscreenElement || document.webkitFullscreenElement;
   if (on) {
-    v.classList.remove("mini", "dragged", "tuck"); v.style.left = ""; v.style.top = ""; audio.controls = !IOS; $("#vtab").hidden = true;
-    v.classList.add("full");
-    try { if (v.requestFullscreen) v.requestFullscreen().catch(() => {}); else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen(); } catch {}
+    v.classList.remove("mini", "dragged", "tuck"); v.style.left = ""; v.style.top = ""; $("#vtab").hidden = true;
+    if (v.requestFullscreen || v.webkitRequestFullscreen) {
+      v.classList.add("full");
+      try { const p = v.requestFullscreen ? v.requestFullscreen() : v.webkitRequestFullscreen(); if (p && p.then) p.then(() => { try { screen.orientation.lock("landscape").catch(() => {}); } catch {} }).catch(() => {}); } catch {}
+    } else if (audio.webkitEnterFullscreen && audio.readyState >= 1) { try { audio.webkitEnterFullscreen(); } catch { v.classList.add("full"); } }   /* iPhone: the system full-screen player, as YouTube does */
+    else v.classList.add("full");
   } else {
     v.classList.remove("full");
-    try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch {}
+    try { screen.orientation.unlock(); } catch {}
+    try { if (fsEl) (document.exitFullscreen ? document.exitFullscreen() : document.webkitExitFullscreen()).catch(() => {}); } catch {}
   }
+  vUi(true);
 }
-document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) $("#vbox").classList.remove("full"); });
-$("#vmini").addEventListener("click", () => vFull(!$("#vbox").classList.contains("full")));
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!(document.fullscreenElement || document.webkitFullscreenElement)) $("#vbox").classList.remove("full"); }));
 $("#vtab").addEventListener("click", () => { const v = $("#vbox"); v.style.left = "10px"; vTuck(false); });
-audio.addEventListener("click", () => { if (($("#vbox").classList.contains("mini") || !audio.controls) && !vMoved) { audio.paused ? audio.play().catch(() => {}) : audio.pause(); } });
+
+/* ---------- YouTube-style controls ---------- */
+var vHideT = 0;
+function vUi(show) {
+  const v = $("#vbox"); clearTimeout(vHideT);
+  v.classList.toggle("ui", !!show);
+  if (show && !audio.paused && !v.classList.contains("drag")) vHideT = setTimeout(() => { if (!audio.paused && !v.classList.contains("drag")) v.classList.remove("ui"); }, 3000);
+}
+function vPaint() {
+  const v = $("#vbox"); if (v.hidden) return;
+  const d = audio.duration, t = audio.currentTime;
+  if (!v.classList.contains("drag")) { v.style.setProperty("--vp", isFinite(d) && d > 0 ? Math.min(1, t / d) : 0); $("#vcur").textContent = fmt(t); }
+  $("#vdur").textContent = isFinite(d) ? fmt(d) : "—";
+  try { const b = audio.buffered; let e = 0; for (let i = 0; i < b.length; i++) if (b.start(i) <= t + 1) e = Math.max(e, b.end(i)); v.style.setProperty("--vb", isFinite(d) && d > 0 ? Math.min(1, e / d) : 0); } catch {}
+}
+["timeupdate", "progress", "durationchange", "loadedmetadata", "seeked"].forEach(ev => audio.addEventListener(ev, vPaint));
+audio.addEventListener("play", () => { $("#vbox").classList.add("playing"); $("#vpp").setAttribute("aria-label", "إيقاف مؤقت"); vUi($("#vbox").classList.contains("ui")); });
+audio.addEventListener("pause", () => { $("#vbox").classList.remove("playing"); $("#vpp").setAttribute("aria-label", "تشغيل"); vUi(true); });
+audio.addEventListener("ratechange", () => { $("#vspd").textContent = AR(String(audio.playbackRate)) + "×"; });
+function vToggle() { audio.paused ? audio.play().catch(() => {}) : audio.pause(); }
+function vSkip(sec) {
+  const d = audio.duration; if (!isFinite(audio.currentTime)) return;
+  audio.currentTime = Math.max(0, Math.min(isFinite(d) ? d - 0.5 : 1e9, audio.currentTime + sec)); vPaint();
+}
+$("#vpp").addEventListener("click", e => { e.stopPropagation(); vToggle(); vUi(true); });
+document.querySelectorAll("[data-vskip]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); vSkip(+b.dataset.vskip); vUi(true); }));
+$("#vfs").addEventListener("click", e => { e.stopPropagation(); vFull(!$("#vbox").classList.contains("full")); });
+$("#vspd").addEventListener("click", e => {
+  e.stopPropagation(); $("#speedBtn").click(); vUi(true); toast($("#speedBtn").textContent);
+});
+/* one tap shows or hides the controls; a double tap on a side jumps 10 seconds (right = back, left = forward) */
+(function () {
+  const tap = $("#vtap"); let last = 0, lastSide = "", oneT = 0, ripT = 0, acc = 0;
+  tap.addEventListener("click", e => {
+    const r = tap.getBoundingClientRect(), x = e.clientX - r.left, side = x > r.width * 0.6 ? "r" : x < r.width * 0.4 ? "l" : "", now = Date.now();
+    if (side && side === lastSide && now - last < 320) {
+      clearTimeout(oneT); const sec = side === "r" ? -10 : 10; vSkip(sec);
+      acc = (lastSide === side && now - last < 900 && acc) ? acc + 10 : 10;
+      const rip = side === "r" ? $("#vripR") : $("#vripL"), other = side === "r" ? $("#vripL") : $("#vripR");
+      other.classList.remove("on"); rip.querySelector("b").textContent = AR(String(acc)) + " ثانية"; rip.classList.add("on");
+      clearTimeout(ripT); ripT = setTimeout(() => { rip.classList.remove("on"); acc = 0; }, 650);
+      last = now; return;
+    }
+    last = now; lastSide = side;
+    clearTimeout(oneT);
+    const v = $("#vbox");
+    oneT = setTimeout(() => vUi(!v.classList.contains("ui")), side ? 230 : 0);
+  });
+})();
+/* the progress bar: drag or tap anywhere along it (it fills from the right, like the rest of the site) */
+(function () {
+  const bar = $("#vseek"), v = $("#vbox"); let on = false, f = 0;
+  const at = e => { const r = bar.getBoundingClientRect(); return Math.min(1, Math.max(0, (r.right - e.clientX) / r.width)); };
+  const show = () => { const d = audio.duration; v.style.setProperty("--vp", f); if (isFinite(d)) $("#vcur").textContent = fmt(f * d); };
+  bar.addEventListener("pointerdown", e => { e.stopPropagation(); on = true; v.classList.add("drag"); clearTimeout(vHideT); f = at(e); show(); try { bar.setPointerCapture(e.pointerId); } catch {} });
+  bar.addEventListener("pointermove", e => { if (!on) return; f = at(e); show(); });
+  const end = () => { if (!on) return; on = false; v.classList.remove("drag"); const d = audio.duration; if (isFinite(d)) audio.currentTime = f * d; vUi(true); };
+  bar.addEventListener("pointerup", end); bar.addEventListener("pointercancel", end);
+  bar.addEventListener("keydown", e => { if (e.key === "ArrowLeft") { vSkip(5); e.preventDefault(); } else if (e.key === "ArrowRight") { vSkip(-5); e.preventDefault(); } });
+})();
+/* phones: dock the video at the top while it is showing */
+(function () {
+  const sync = () => document.body.classList.toggle("vdock", !$("#vbox").hidden || !$("#ytbox").hidden);
+  const mo = new MutationObserver(sync); mo.observe($("#vbox"), { attributes: true, attributeFilter: ["hidden"] }); mo.observe($("#ytbox"), { attributes: true, attributeFilter: ["hidden"] }); sync();
+})();
 
 /* ---------- video: stay inside the page on iPhone, and show progress while it loads ---------- */
 /* iPhone and iPad: the native control bar has a full-screen button that takes the video out of the page.
    Without it, the site's own bar controls playback, ⤢ fills the window inside the page, and a tap plays or pauses. */
 var IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-if (IOS) audio.controls = false;
+audio.controls = false;
 function vPoster(r) { const m = /archive\.org\/download\/([^/]+)\//.exec(r.vurl || ""); return m ? "https://archive.org/services/img/" + m[1] : ""; }
 var vlT = 0;
 function vLoading(on, slowText) {
@@ -2060,37 +2200,6 @@ document.addEventListener("click", e => {
   audio.load(); audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); if (t > 1) audio.currentTime = t; }, { once: true });
   audio.play().catch(() => {});
 });
-let vMoved = false;
-(function () {
-  const box = $("#vbox"); let sx, sy, ox, oy, on = false;
-  box.addEventListener("pointerdown", e => {
-    if (e.target.closest("button")) return;
-    if (!box.classList.contains("mini") && !e.target.closest("#vbar")) return;
-    const r = box.getBoundingClientRect(); on = true; vMoved = false; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
-    box.classList.add("dragged"); box.style.left = ox + "px"; box.style.top = oy + "px";
-    try { box.setPointerCapture(e.pointerId); } catch {}
-  });
-  box.addEventListener("pointermove", e => {
-    if (!on) return;
-    if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 6) vMoved = true;
-    const w = box.offsetWidth, h = box.offsetHeight;
-    box.style.left = Math.min(Math.max(-w * 0.45, ox + e.clientX - sx), innerWidth - w * 0.55) + "px";
-    box.style.top = Math.min(Math.max(0, oy + e.clientY - sy), innerHeight - h) + "px";
-  });
-  const end = () => {
-    if (!on) return; on = false;
-    setTimeout(() => { vMoved = false; }, 60);
-    if (!vMoved) return;
-    const r = box.getBoundingClientRect(), w = r.width;
-    if (box.classList.contains("mini") && r.left < -w * 0.25) { box.style.left = "10px"; vTuck(true); return; }   /* pushed off the left edge: tuck into the side tab */
-    if (box.classList.contains("mini")) {                                                                        /* snap to the nearest side */
-      box.classList.add("snap"); box.style.left = ((r.left + w / 2) < innerWidth / 2 ? 10 : innerWidth - w - 10) + "px";
-      setTimeout(() => { box.classList.remove("snap"); }, 330);
-    }
-  };
-  box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
-})();
-
 /* ---------- faster start: warm up the file on touch, and the next one after play ---------- */
 const warm = new Map();
 function warmUp(url) {
