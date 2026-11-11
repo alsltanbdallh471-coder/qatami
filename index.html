@@ -244,10 +244,10 @@ section.block{margin-block:40px}
 .tracks{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
 .tracks li{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line);transition:background .15s}
 .tracks li:first-child{border-top:0}
-.tracks li:hover{background:color-mix(in srgb,var(--brass-soft) 60%,transparent)}
+@media (hover:hover){.tracks li:hover{background:color-mix(in srgb,var(--brass-soft) 60%,transparent)}}
 .tracks li.playing{background:var(--gold-soft)}
 .tracks .pbtn{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--brass);border:1.5px solid var(--line-strong);transition:all .15s}
-.tracks .pbtn:hover,.tracks li.playing .pbtn{background:var(--gold);color:#FFFDF6;border-color:transparent;box-shadow:0 4px 12px rgba(110,79,20,.3)}
+.tracks li.playing .pbtn{background:var(--gold);color:#FFFDF6;border-color:transparent;box-shadow:0 4px 12px rgba(110,79,20,.3)}
 .tracks .pbtn svg{width:15px;height:15px}
 .tracks .info{flex:1;min-width:0}
 .tracks .ttl{font-family:var(--f-quran);font-size:1.18rem;font-weight:700;display:block;line-height:1.45;overflow-wrap:anywhere}
@@ -318,6 +318,70 @@ body:not(.pclosed) .player{animation:pslide .3s ease-out}
 #vbox.snap{transition:left .3s cubic-bezier(.2,.8,.2,1),top .3s cubic-bezier(.2,.8,.2,1),width .3s cubic-bezier(.2,.8,.2,1),transform .3s cubic-bezier(.2,.8,.2,1)}
 #vbox.mini{transition:width .3s cubic-bezier(.2,.8,.2,1)}
 .tracks li{transition:background .2s,box-shadow .2s}
+/* ---------- track rows: a card per recitation ---------- */
+ol.tracks{background:none;border:0;border-radius:0;box-shadow:none;overflow:visible;display:grid;gap:10px}
+ol.tracks li,ol.tracks li:first-child{-webkit-tap-highlight-color:transparent;position:relative;isolation:isolate;overflow:hidden;gap:12px;padding:12px 12px 12px 6px;border:1px solid var(--line);border-radius:20px;
+  background:linear-gradient(180deg,var(--surface) 0%,color-mix(in srgb,var(--surface) 82%,var(--brass-soft)) 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 8px 18px -14px rgba(90,62,14,.55);transition:border-color .25s,box-shadow .25s,transform .18s,background .25s}
+ol.tracks li::before{content:"";position:absolute;inset:4px;border:1px solid color-mix(in srgb,var(--line-strong) 16%,transparent);border-radius:16px;pointer-events:none;z-index:-1}
+@media (hover:hover){ol.tracks li:hover{border-color:color-mix(in srgb,var(--line-strong) 60%,var(--line));box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 24px -16px rgba(90,62,14,.6)}
+  ol.tracks li:hover::before{border-color:color-mix(in srgb,var(--line-strong) 34%,transparent)}}
+/* touch: a gold glint runs across the card, then it settles back (no sticky highlight on iPhone) */
+ol.tracks li.press{border-color:var(--line-strong);transform:scale(.985);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 0 3px color-mix(in srgb,var(--line-strong) 20%,transparent),0 10px 22px -16px rgba(90,62,14,.6)}
+ol.tracks li::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;
+  background:linear-gradient(105deg,transparent 30%,color-mix(in srgb,var(--line-strong) 22%,transparent) 48%,color-mix(in srgb,#F8E7B4 40%,transparent) 50%,color-mix(in srgb,var(--line-strong) 22%,transparent) 52%,transparent 70%);
+  background-size:250% 100%;background-position:0 0}
+ol.tracks li.press::after{animation:tGlint .75s cubic-bezier(.3,.6,.3,1) forwards}
+
+/* watermark: a faint gold seal with the surah (or night) number */
+.twm{position:absolute;z-index:-1;inset-inline-end:clamp(112px,34%,220px);top:50%;width:132px;height:132px;margin-top:-66px;color:var(--line-strong);opacity:.16;pointer-events:none;display:grid;place-items:center;transition:opacity .4s,transform .8s cubic-bezier(.22,1,.36,1)}
+.twm svg{position:absolute;inset:0;width:100%;height:100%}
+.twm b{position:relative;font-family:var(--f-quran);font-weight:700;font-size:2.1rem;line-height:1;color:var(--brass);padding-top:.15em}
+ol.tracks li.playing .twm{opacity:.3}
+ol.tracks li.playing .twm svg{animation:twmSpin 40s linear infinite}
+ol.tracks li.press .twm{transform:rotate(22.5deg) scale(1.04);opacity:.26}
+@keyframes twmSpin{to{transform:rotate(360deg)}}
+:root[data-theme="dark"] .twm{opacity:.2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .twm{opacity:.2}}
+@media (max-width:520px){.twm{width:112px;height:112px;margin-top:-56px;inset-inline-end:118px}.twm b{font-size:1.8rem}}
+@media (prefers-reduced-motion:reduce){ol.tracks li.playing .twm svg{animation:none}}
+@keyframes tGlint{0%{opacity:1;background-position:0 0}100%{opacity:0;background-position:100% 0}}
+ol.tracks li.playing{background:var(--gold-soft);border-color:var(--line-strong);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 0 3px color-mix(in srgb,var(--line-strong) 16%,transparent),0 12px 26px -16px rgba(110,79,20,.6)}
+ol.tracks li.playing::before{border-color:color-mix(in srgb,var(--line-strong) 38%,transparent)}
+/* the play button is a gold eight-point seal */
+ol.tracks .pbtn,ol.tracks .pbtn:hover,ol.tracks li.playing .pbtn{position:relative;width:48px;height:48px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--brass);isolation:isolate}
+ol.tracks .pbtn::before,ol.tracks .pbtn::after{content:"";position:absolute;inset:8px;border:1.5px solid var(--line-strong);border-radius:5px;background:var(--surface);z-index:-1;transition:transform .5s cubic-bezier(.22,1,.36,1),background .25s,border-color .25s}
+ol.tracks .pbtn::after{transform:rotate(45deg)}
+@media (hover:hover){ol.tracks .pbtn:hover::before{transform:rotate(22.5deg)}ol.tracks .pbtn:hover::after{transform:rotate(67.5deg)}}
+ol.tracks li.press .pbtn::before{transform:rotate(22.5deg)}ol.tracks li.press .pbtn::after{transform:rotate(67.5deg)}
+ol.tracks li.playing .pbtn{color:#FFFDF6}
+ol.tracks li.playing .pbtn::before,ol.tracks li.playing .pbtn::after{background:var(--gold);border-color:transparent}
+ol.tracks li.playing .pbtn::before{box-shadow:0 4px 14px rgba(110,79,20,.35)}
+ol.tracks .pbtn svg{width:15px;height:15px;margin-inline-end:-1px}
+ol.tracks .info{display:grid;gap:3px}
+ol.tracks .ttl{font-size:1.24rem;line-height:1.4}
+ol.tracks .ttl.long{font-size:1.06rem;line-height:1.55}
+ol.tracks .sub{font-size:.76rem;gap:4px 6px;line-height:1.7}
+ol.tracks li.heard .ttl{color:color-mix(in srgb,var(--ink) 78%,var(--muted))}
+ol.tracks .acts{gap:0;align-self:center;align-items:center}
+ol.tracks .acts .icon-btn{width:36px;height:36px;color:var(--muted)}
+ol.tracks .acts .icon-btn:hover{color:var(--ink)}
+ol.tracks .acts .fav-on{color:#B8913A}
+ol.tracks .acts .tmore svg{width:20px;height:20px}
+.tprog{position:absolute;inset-inline:18px;bottom:0;height:2.5px;border-radius:3px 3px 0 0;background:color-mix(in srgb,var(--line) 70%,transparent);overflow:hidden;pointer-events:none}
+.tprog::after{content:"";position:absolute;inset-block:0;right:0;width:calc(var(--p)*100%);background:var(--gold);border-radius:inherit}
+/* the ⋯ menu */
+.tmenu{position:fixed;z-index:60;min-width:200px;direction:rtl;padding:6px;border-radius:18px;background:var(--surface);border:1px solid var(--line-strong);
+  box-shadow:0 22px 50px -14px rgba(40,26,6,.45),0 2px 6px rgba(0,0,0,.08);transform-origin:var(--ox,left) var(--oy,top);animation:tmIn .22s cubic-bezier(.22,1,.36,1)}
+.tmenu.bye{opacity:0;transform:scale(.96);transition:opacity .14s,transform .14s}
+@keyframes tmIn{from{opacity:0;transform:scale(.94)}}
+.tmenu .tmh{font-family:var(--f-quran);font-weight:700;font-size:.98rem;padding:6px 12px 6px;border-bottom:1px solid var(--line);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;color:var(--brass)}
+.tmenu button{display:flex;align-items:center;gap:12px;width:100%;font:inherit;font-size:.92rem;color:var(--ink);background:none;border:0;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:start;-webkit-tap-highlight-color:transparent}
+.tmenu button:hover,.tmenu button:focus-visible{background:var(--brass-soft);outline:none}
+.tmenu button svg{width:19px;height:19px;color:var(--brass);flex:none}
+@media (max-width:520px){ol.tracks li,ol.tracks li:first-child{gap:9px;padding:11px 10px 11px 2px}ol.tracks .ttl{font-size:1.16rem}ol.tracks .acts .icon-btn{width:34px}}
+@media (prefers-reduced-motion:reduce){ol.tracks .pbtn::before,ol.tracks .pbtn::after{transition:none}.tmenu{animation:none}ol.tracks li.press::after{animation:none}ol.tracks li.press{transform:none}}
+
 @media (prefers-reduced-motion:reduce){#vbox,.player{animation:none!important}}
 .yrdoors{margin-top:22px}
 .door .go{position:relative;margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#FFFDF6;background:var(--gold);padding:5px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(110,79,20,.28)}
@@ -806,6 +870,7 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
     <symbol id="i-mark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/></symbol>
     <symbol id="i-mark-f" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></g></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></symbol>
@@ -1088,7 +1153,10 @@ function trackRow(r, ctx) {
   if (marks[r.key] && marks[r.key].length) sub.push(`<span class="done">🔖 ${AR(marks[r.key].length)} ${marks[r.key].length > 2 ? "علامات" : marks[r.key].length === 2 ? "علامتان" : "علامة"}</span>`);
   if (isDone) sub.push(`<span class="done">✓ استمعت</span>`);
   if (offSaved(r)) sub.push(`<span class="done">⤓ محمّلة</span>`);
-  return `<li class="${playing ? "playing" : ""}" data-key="${esc(r.key)}">
+  const prog = r.d && pos[r.key] > 5 && !isDone ? Math.min(1, pos[r.key] / r.d) : isDone ? 1 : 0;
+  const wmN = r.surah || (r.cat === "ramadan" && r.night) || 0;
+  const wm = `<span class="twm" aria-hidden="true"><svg viewBox="0 0 120 120"><g fill="none" stroke="currentColor"><rect x="27" y="27" width="66" height="66" stroke-width="1.6"/><rect x="27" y="27" width="66" height="66" transform="rotate(45 60 60)" stroke-width="1.6"/><circle cx="60" cy="60" r="27" stroke-width="1"/><circle cx="60" cy="60" r="52" stroke-width=".7" stroke-dasharray="2 4"/><rect x="38" y="38" width="44" height="44" transform="rotate(22.5 60 60)" stroke-width=".8"/></g></svg>${wmN ? `<b>${AR(wmN)}</b>` : ""}</span>`;
+  return `<li class="${playing ? "playing" : ""}${isDone ? " heard" : ""}" data-key="${esc(r.key)}">${wm}${prog ? `<i class="tprog" style="--p:${prog.toFixed(3)}" aria-hidden="true"></i>` : ""}
     ${extMode ? `<a class="pbtn" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="استمع إلى ${esc(r.title)} في تبويب جديد">${icon("i-play")}</a>`
       : at ? `<button class="pbtn" data-mkgo="${esc(r.key)}" data-t="${at}" aria-label="تشغيل من ${fmt(at)}">${icon("i-play")}</button>`
       : `<button class="pbtn" data-play="${esc(r.key)}" aria-label="تشغيل ${esc(r.title)}">${icon(playing && !audio.paused ? "i-pause" : "i-play")}</button>`}
@@ -1096,12 +1164,15 @@ function trackRow(r, ctx) {
       <span class="sub">${sub.join(" · ")}</span></div>
     <div class="acts">
       <button class="icon-btn ${isFav ? "fav-on" : ""}" data-fav="${esc(r.key)}" aria-pressed="${isFav}" aria-label="المفضلة">${icon(isFav ? "i-heart-f" : "i-heart")}</button>
-      <button class="icon-btn" data-pl="${esc(r.key)}" aria-label="أضف إلى قائمة" title="أضف إلى قائمة">${icon("i-plus")}</button>
-      ${ctx === "list" ? `<button class="icon-btn" data-lrm="${esc(r.key)}" aria-label="أزل من القائمة" title="أزل من القائمة">${icon("i-x")}</button>` : ""}
-      <button class="icon-btn" data-card="${esc(r.key)}" aria-label="بطاقة مشاركة" title="بطاقة مشاركة">${icon("i-card")}</button>
-      <button class="icon-btn share" data-share="${esc(r.key)}" aria-label="نسخ رابط" title="نسخ الرابط">${icon("i-share")}</button>
+      <span class="tmore-src" hidden>
+      <button class="icon-btn" data-pl="${esc(r.key)}" data-ml="أضف إلى قائمة" aria-label="أضف إلى قائمة">${icon("i-plus")}</button>
+      ${ctx === "list" ? `<button class="icon-btn" data-lrm="${esc(r.key)}" data-ml="أزل من هذي القائمة" aria-label="أزل من القائمة">${icon("i-x")}</button>` : ""}
+      <button class="icon-btn" data-card="${esc(r.key)}" data-ml="بطاقة للمشاركة" aria-label="بطاقة مشاركة">${icon("i-card")}</button>
+      <button class="icon-btn" data-share="${esc(r.key)}" data-ml="نسخ الرابط" aria-label="نسخ رابط">${icon("i-share")}</button>
+      </span>
       ${OFF.ok && !r.yt ? `<button class="icon-btn dlbtn ${offSaved(r) ? "saved" : ""}" data-off="${esc(r.key)}" aria-label="${offSaved(r) ? "محمّلة، اضغط لحذفها من الموقع" : "حفظ داخل الموقع للاستماع بدون نت"}">${icon(offSaved(r) ? "i-check" : "i-down")}</button>`
         : `<a class="icon-btn" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="${r.yt ? "افتح على يوتيوب" : "تحميل"}">${icon("i-down")}</a>`}
+      <button class="icon-btn tmore" data-tmore aria-label="خيارات أكثر" aria-haspopup="menu" aria-expanded="false">${icon("i-more")}</button>
     </div></li>`;
 }
 const trackList = (rows, ctx) => rows.length ? `<ol class="tracks" data-list>${rows.map(r => trackRow(r, ctx)).join("")}</ol>` : `<div class="empty">لا توجد تسجيلات هنا بعد.</div>`;
@@ -2137,6 +2208,40 @@ function step(dir, auto) {
   if (i < 0) i = player.repeat === "all" ? player.order.length - 1 : 0;
   player.idx = i; load(player.queue[player.order[i]], { resume: !auto, fade: !!auto }); if (auto && player.cur) toast("التالية: " + player.cur.title);
 }
+/* touch feedback on a recitation card */
+document.addEventListener("pointerdown", e => {
+  const li = e.target.closest("ol.tracks li"); if (!li) return;
+  li.classList.remove("press"); void li.offsetWidth; li.classList.add("press");
+  clearTimeout(li._pt); li._pt = setTimeout(() => li.classList.remove("press"), 760);
+}, { passive: true });
+
+/* ---------- ⋯ menu on each recitation: list, card, link ---------- */
+(function () {
+  let menu = null, from = null;
+  const close = (quick) => { if (!menu) return; const m = menu; menu = null; if (from) from.setAttribute("aria-expanded", "false"); from = null; if (quick) m.remove(); else { m.classList.add("bye"); setTimeout(() => m.remove(), 150); } };
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-tmore]");
+    if (!b) { if (menu && !e.target.closest(".tmenu")) close(); return; }
+    e.preventDefault(); e.stopPropagation();
+    if (from === b) { close(); return; }
+    close(true);
+    const li = b.closest("li"), src = li && li.querySelector(".tmore-src"); if (!src) return;
+    const r = BY_KEY.get(li.dataset.key);
+    menu = document.createElement("div"); menu.className = "tmenu"; menu.setAttribute("role", "menu");
+    menu.innerHTML = (r ? `<div class="tmh">${esc(r.title)}</div>` : "") + [...src.querySelectorAll("button")].map((x, i) => `<button type="button" role="menuitem" data-tmi="${i}">${x.innerHTML}<span>${esc(x.dataset.ml || x.getAttribute("aria-label") || "")}</span></button>`).join("");
+    menu.addEventListener("click", ev => { const it = ev.target.closest("[data-tmi]"); if (!it) return; ev.stopPropagation(); const t = src.querySelectorAll("button")[+it.dataset.tmi]; close(true); if (t) t.click(); });
+    document.body.appendChild(menu); from = b; sy0 = scrollY; b.setAttribute("aria-expanded", "true");
+    const br = b.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight, W = document.documentElement.clientWidth, H = innerHeight;
+    const left = Math.max(10, Math.min(W - mw - 10, br.left)), below = br.bottom + 6 + mh < H - 10;
+    menu.style.left = left + "px"; menu.style.top = (below ? br.bottom + 6 : Math.max(10, br.top - mh - 6)) + "px";
+    menu.style.setProperty("--ox", (br.left + br.width / 2 - left) + "px"); menu.style.setProperty("--oy", below ? "top" : "bottom");
+    const first = menu.querySelector("[data-tmi]"); first && first.focus({ preventScroll: true });
+  }, true);
+  let sy0 = 0; addEventListener("scroll", () => { if (menu && Math.abs(scrollY - sy0) > 24) close(); }, { passive: true }); addEventListener("resize", () => close());
+  addEventListener("keydown", e => { if (e.key === "Escape" && menu) { const b = from; close(); b && b.focus(); } });
+  addEventListener("hashchange", () => close(true));
+})();
+
 function paintRows() {
   document.querySelectorAll("#view .tracks li").forEach(li => {
     const on = player.cur && li.dataset.key === player.cur.key;
@@ -2891,7 +2996,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
     {c:1,sel:".resume.todaypick",t:"تلاوة اليوم",p:"تلاوة مختارة تتغير كل يوم. وإذا وقفت في أي تلاوة، يظهر هنا زر <b>«تابع من حيث توقفت»</b>."},
     {c:1,sel:".today .panel:first-child",t:"يقترح لك حسب الوقت",p:"مواقيت الصلاة، واقتراح يناسب الساعة: فجريات عند الفجر، وفي رمضان تلاوات <b>الليلة نفسها</b>."},
     {c:1,sel:".today .panel:last-child",t:"وِردك اليومي",p:"حدد كم دقيقة تسمع كل يوم، ويحسب لك أيامك المتتالية."},
-    {c:2,sel:".tracks li .acts",page:"list",t:"أزرار كل تلاوة",p:"هذي صفحة سنة ١٤٤٤هـ. وبجانب كل تلاوة تلقى:",chips:["♡ المفضلة","＋ قائمة","بطاقة للواتساب","الرابط","⤓ بدون نت"]},
+    {c:2,sel:".tracks li .acts",page:"list",t:"أزرار كل تلاوة",p:"هذي صفحة سنة ١٤٤٤هـ. بجانب كل تلاوة: <b>♡</b> للمفضلة، <b>⤓</b> للاستماع بدون نت، و<b>⋯</b> فيها:",chips:["＋ قائمة","بطاقة للواتساب","الرابط"]},
     {c:2,sel:"#player",fixed:1,t:"المشغّل",p:"تكرار، سرعة، ومؤقت النوم. واضغط على <b>اسم التلاوة</b> فيه ليفتح المشغّل الكامل: العلامات، فهرس الليلة، والوضع الهادئ."},
     {c:3,sel:"#themeBtn",top:1,t:"الوضع الليلي",p:"يبدّل بين المظهر الفاتح والداكن."},
     {c:3,sel:"#tourBtn",top:1,last:1,t:"الجولة متى ما بغيت",p:"هذا الزر يرجّع لك الجولة في أي وقت."}
