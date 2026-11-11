@@ -603,6 +603,13 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 #vbox.full .vseek{bottom:env(safe-area-inset-bottom,0px)}
 #vbox .vload{z-index:5}
 #vbox .vload b,#vbox .vload small{text-shadow:0 1px 3px rgba(0,0,0,.6)}
+/* full window on a portrait phone: turned a quarter turn so it reads landscape */
+#vbox.full.land{inset:auto!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;width:var(--lh,100vh)!important;height:var(--lw,100vw)!important;
+  transform-origin:0 0!important;transform:translateX(var(--lw,100vw)) rotate(90deg)!important}
+#vbox.full.land .vtopr{padding:8px 34px 0}
+#vbox.full.land .vbot{padding:0 34px 18px}
+#vbox.full.land .vseek{bottom:0}
+#vbox.full.land .vmid{gap:clamp(48px,14vh,96px)}
 /* phones: the video sits at the top of the screen and the page scrolls under it, like YouTube */
 @media (max-width:760px){
   body.vdock{--vdh:min(56.25vw,62vh);padding-top:calc(var(--vdh) + env(safe-area-inset-top,0px))}
@@ -2141,7 +2148,7 @@ function closePlayer() {
 $("#pclose").addEventListener("click", closePlayer);
 $("#vclose").addEventListener("click", () => { const r = player.cur; if (r && r.vurl && VMODE.has(r.key)) { setVMode(r, false); toast("نكمل صوتياً"); } else closePlayer(); });
 function vReset() {
-  const v = $("#vbox"); if (v.classList.contains("full")) vFull(false); v.classList.remove("tuck", "mini", "dragged", "full"); v.style.left = ""; v.style.top = ""; audio.controls = false; $("#vtab").hidden = true; vUi(true);
+  const v = $("#vbox"); if (v.classList.contains("full")) vFull(false); v.classList.remove("tuck", "mini", "dragged", "full", "land"); v.style.left = ""; v.style.top = ""; audio.controls = false; $("#vtab").hidden = true; vUi(true);
 }
 function vSnap() { const v = $("#vbox"); v.classList.add("snap"); setTimeout(() => v.classList.remove("snap"), 340); }
 function vMini(on) {
@@ -2160,19 +2167,28 @@ function vFull(on) {
   const v = $("#vbox"), fsEl = document.fullscreenElement || document.webkitFullscreenElement;
   if (on) {
     v.classList.remove("mini", "dragged", "tuck"); v.style.left = ""; v.style.top = ""; $("#vtab").hidden = true;
+    v.classList.add("full"); document.querySelectorAll(".tg-hint").forEach(h => h.remove());
+    /* browsers that can full-screen any element (Android, desktop) do it and lock to landscape;
+       iPhone cannot, so the video fills the window and turns sideways by itself */
     if (v.requestFullscreen || v.webkitRequestFullscreen) {
-      v.classList.add("full");
       try { const p = v.requestFullscreen ? v.requestFullscreen() : v.webkitRequestFullscreen(); if (p && p.then) p.then(() => { try { screen.orientation.lock("landscape").catch(() => {}); } catch {} }).catch(() => {}); } catch {}
-    } else if (audio.webkitEnterFullscreen && audio.readyState >= 1) { try { audio.webkitEnterFullscreen(); } catch { v.classList.add("full"); } }   /* iPhone: the system full-screen player, as YouTube does */
-    else v.classList.add("full");
+    }
   } else {
-    v.classList.remove("full");
+    v.classList.remove("full", "land");
     try { screen.orientation.unlock(); } catch {}
     try { if (fsEl) (document.exitFullscreen ? document.exitFullscreen() : document.webkitExitFullscreen()).catch(() => {}); } catch {}
   }
-  vUi(true);
+  vLand(); vUi(true);
 }
-["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!(document.fullscreenElement || document.webkitFullscreenElement)) $("#vbox").classList.remove("full"); }));
+/* in full-window mode on a portrait screen: turn the video sideways, so the person just rotates the phone to match */
+function vLand() {
+  const v = $("#vbox"); if (!v) return;
+  const w = document.documentElement.clientWidth, h = innerHeight;
+  v.style.setProperty("--lw", w + "px"); v.style.setProperty("--lh", h + "px");
+  v.classList.toggle("land", v.classList.contains("full") && !(document.fullscreenElement || document.webkitFullscreenElement) && h > w);
+}
+addEventListener("resize", vLand); addEventListener("orientationchange", () => setTimeout(vLand, 120));
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!(document.fullscreenElement || document.webkitFullscreenElement)) $("#vbox").classList.remove("full"); vLand(); }));
 $("#vtab").addEventListener("click", () => { const v = $("#vbox"); v.style.left = "10px"; vTuck(false); });
 
 /* ---------- YouTube-style controls ---------- */
@@ -2208,7 +2224,7 @@ $("#vspd").addEventListener("click", e => {
 (function () {
   const tap = $("#vtap"); let last = 0, lastSide = "", oneT = 0, ripT = 0, acc = 0;
   tap.addEventListener("click", e => {
-    const r = tap.getBoundingClientRect(), x = e.clientX - r.left, side = x > r.width * 0.6 ? "r" : x < r.width * 0.4 ? "l" : "", now = Date.now();
+    const r = tap.getBoundingClientRect(), turned = $("#vbox").classList.contains("land"), fx = turned ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width, side = fx > 0.6 ? "r" : fx < 0.4 ? "l" : "", now = Date.now();
     if (side && side === lastSide && now - last < 320) {
       clearTimeout(oneT); const sec = side === "r" ? -10 : 10; vSkip(sec);
       acc = (lastSide === side && now - last < 900 && acc) ? acc + 10 : 10;
@@ -2226,7 +2242,7 @@ $("#vspd").addEventListener("click", e => {
 /* the progress bar: drag or tap anywhere along it (it fills from the right, like the rest of the site) */
 (function () {
   const bar = $("#vseek"), v = $("#vbox"); let on = false, f = 0;
-  const at = e => { const r = bar.getBoundingClientRect(); return Math.min(1, Math.max(0, (r.right - e.clientX) / r.width)); };
+  const at = e => { const r = bar.getBoundingClientRect(); const f = v.classList.contains("land") ? 1 - (e.clientY - r.top) / r.height : (r.right - e.clientX) / r.width; return Math.min(1, Math.max(0, f)); };
   const show = () => { const d = audio.duration; v.style.setProperty("--vp", f); if (isFinite(d)) $("#vcur").textContent = fmt(f * d); };
   bar.addEventListener("pointerdown", e => { e.stopPropagation(); on = true; v.classList.add("drag"); clearTimeout(vHideT); f = at(e); show(); try { bar.setPointerCapture(e.pointerId); } catch {} });
   bar.addEventListener("pointermove", e => { if (!on) return; f = at(e); show(); });
@@ -3362,7 +3378,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
   }
 
   function hint(key,target,html,host){
-    if(LS.get("h-"+key)||!visible(target))return false;LS.set("h-"+key);
+    if(LS.get("h-"+key)||!visible(target)||document.querySelector("#vbox.full"))return false;LS.set("h-"+key);
     var h=document.createElement("div");h.className="tg-hint";h.innerHTML='<span class="ar"></span>'+html;
     (host||document.body).appendChild(h);
     var r=target.getBoundingClientRect(),hw=h.offsetWidth,hh=h.offsetHeight,down=r.top<hh+30;
