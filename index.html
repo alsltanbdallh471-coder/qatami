@@ -2318,6 +2318,17 @@ function statView() {
     const day = new Date().toLocaleDateString("en-CA"), seen = localStorage.getItem("qtm-stat-day");
     if (seen !== day) { stat(seen ? "visit/back" : "visit/new"); localStorage.setItem("qtm-stat-day", day); }
   } catch {}
+  /* who is here now: one beat per 5-minute slot while the page is open or audio is playing.
+     Slot names repeat every 12 hours (144 names), the stats page reads the current slot. */
+  let slot = -1;
+  function beat() {
+    try {
+      if (document.hidden && audio.paused) return;
+      const n = Math.floor(Date.now() / 300e3) % 144; if (n === slot) return;
+      slot = n; stat("now/" + n);
+    } catch {}
+  }
+  beat(); setInterval(beat, 20e3); document.addEventListener("visibilitychange", beat); audio.addEventListener("timeupdate", beat);
   /* total listening: the counter repeats a path only once per visit, so minutes are sent as steps
      (1, 2, 3, 5, 10 ... then every 30) of this device's running total; it restarts after 12 quiet hours */
   const STEPS = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
