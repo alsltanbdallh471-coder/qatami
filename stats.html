@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#070504">
+<title>إحصاءات نبأ عظيم</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#070504;--ink:#F6EBD0;--muted:#BFAA80;--faint:#7D6A48;--line:rgba(227,195,106,.16);
+  --gold:#E3C36A;--gold-hi:#FBEFC6;--gold-deep:#8F6A22;--ember:#E98A4B;--ok:#A8DB8F;--bad:#EB8573;
+  --glass:rgba(255,236,190,.045);
+  --gtext:linear-gradient(175deg,#FFF6D8 5%,#E9C972 45%,#9C7527 100%);
+  --f-k:"Reem Kufi","Amiri",sans-serif;--f-d:"Amiri",serif;--f-b:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-b);line-height:1.6;min-height:100vh;overflow-x:hidden;
+  padding:0 max(14px,env(safe-area-inset-left)) 50px max(14px,env(safe-area-inset-right))}
+/* sky */
+.sky{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(70% 38% at 50% -4%,rgba(227,160,70,.28),transparent 70%),
+             radial-gradient(50% 30% at 100% 60%,rgba(143,106,34,.14),transparent 70%),
+             radial-gradient(45% 28% at 0% 85%,rgba(233,138,75,.09),transparent 70%)}
+.sky i{position:absolute;width:2px;height:2px;border-radius:50%;background:#FFF1C9;animation:tw var(--d) ease-in-out infinite;opacity:.2}
+@keyframes tw{50%{opacity:.9;transform:scale(1.6)}}
+.wrap{max-width:540px;margin:0 auto}
+.gt{background:var(--gtext);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;padding:16px 2px 6px}
+.brand{font-family:var(--f-d);font-size:1.25rem;font-weight:700}
+.live{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:4px 11px;background:var(--glass)}
+.live u{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(168,219,143,.7);animation:pulse 1.8s infinite}
+@keyframes pulse{to{box-shadow:0 0 0 9px rgba(168,219,143,0)}}
+.demo{text-align:center;font-size:.7rem;color:var(--faint);margin:2px 0 0}
+
+/* hero arch */
+.hero{position:relative;margin:14px auto 0;padding:54px 18px 26px;text-align:center;overflow:hidden;
+  border-radius:50% 50% 30px 30px / 34% 34% 30px 30px;
+  background:linear-gradient(180deg,rgba(227,195,106,.17),rgba(227,195,106,.02) 62%),#0E0A06;
+  box-shadow:inset 0 0 0 1px rgba(227,195,106,.32),inset 0 0 0 7px #0B0805,inset 0 0 0 8px rgba(227,195,106,.14),0 40px 70px -40px rgba(227,160,70,.55)}
+.hero svg.star{position:absolute;left:50%;top:44%;width:330px;height:330px;translate:-50% -50%;opacity:.16;animation:spin 90s linear infinite}
+@keyframes spin{to{rotate:360deg}}
+.hero .lab{position:relative;font-family:var(--f-b);font-size:.86rem;color:var(--muted);letter-spacing:.02em}
+.hero .big{position:relative;font-family:var(--f-k);font-weight:700;font-size:clamp(5rem,27vw,7.6rem);line-height:1.05;
+  background:var(--gtext);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 26px rgba(227,170,80,.35))}
+.hero .unit{position:relative;font-family:var(--f-d);font-size:1.5rem;margin-top:-4px}
+.hero .delta{position:relative;display:inline-block;margin-top:10px;font-size:.76rem;color:#0E0A06;background:var(--ok);border-radius:99px;padding:2px 11px;font-weight:600}
+.seg{position:relative;display:inline-flex;margin-top:18px;padding:3px;border-radius:99px;background:rgba(0,0,0,.45);border:1px solid var(--line)}
+.seg button{font:inherit;font-size:.78rem;color:var(--muted);background:none;border:0;border-radius:99px;padding:5px 13px;cursor:pointer}
+.seg button.on{background:linear-gradient(180deg,#F3DC97,#B98F38);color:#1A1209;font-weight:600}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.tile{position:relative;border:1px solid var(--line);border-radius:20px;background:var(--glass);backdrop-filter:blur(8px);padding:13px 8px 11px;text-align:center;overflow:hidden}
+.tile::after{content:"";position:absolute;inset:auto 22% 0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.tile b{display:block;font-family:var(--f-k);font-size:1.55rem;line-height:1.25;color:var(--gold-hi)}
+.tile span{font-size:.7rem;color:var(--muted)}
+
+/* sections */
+section{margin-top:30px;opacity:0;translate:0 22px;transition:opacity .7s,translate .7s cubic-bezier(.2,.8,.2,1)}
+section.in{opacity:1;translate:0 0}
+.h{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 11px}
+.h h2{margin:0;font-family:var(--f-d);font-weight:700;font-size:1.45rem;line-height:1.3}
+.h small{font-size:.72rem;color:var(--faint)}
+.panel{position:relative;border:1px solid var(--line);border-radius:26px;background:linear-gradient(160deg,rgba(255,236,190,.07),rgba(255,236,190,.015));padding:16px;overflow:hidden}
+
+/* area chart */
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ln{stroke-dasharray:1200;stroke-dashoffset:1200}
+.in .chart .ln{animation:draw 1.8s .15s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.chart .ar{opacity:0}.in .chart .ar{animation:fade 1s 1s forwards}
+@keyframes fade{to{opacity:1}}
+.days{display:flex;justify-content:space-between;font-size:.66rem;color:var(--faint);margin-top:4px;direction:ltr}
+.peak{position:absolute;top:14px;inset-inline-start:16px;font-size:.72rem;color:var(--muted)}
+.peak b{font-family:var(--f-k);font-size:1.3rem;color:var(--gold-hi);margin-inline-end:4px}
+
+/* champion */
+.champ{position:relative;border-radius:26px;padding:20px 18px 18px;overflow:hidden;color:#1B1206;
+  background:linear-gradient(135deg,#FBEFC6 0%,#E3C36A 42%,#A9802E 100%);box-shadow:0 26px 50px -26px rgba(227,170,80,.7)}
+.champ::before{content:"١";position:absolute;inset-inline-end:-6px;top:-58px;font-family:var(--f-k);font-weight:700;font-size:13rem;line-height:1;color:rgba(255,255,255,.26)}
+.champ::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);translate:120% 0;animation:shine 4.5s 1s infinite}
+@keyframes shine{0%{translate:120% 0}45%,100%{translate:-120% 0}}
+.champ .tag{position:relative;display:inline-block;font-size:.68rem;font-weight:600;background:#1B1206;color:var(--gold-hi);border-radius:99px;padding:2px 10px}
+.champ .name{position:relative;font-family:var(--f-d);font-weight:700;font-size:1.55rem;line-height:1.45;margin-top:8px}
+.champ .meta{position:relative;font-size:.76rem;opacity:.75}
+.champ .nums{position:relative;display:flex;gap:22px;margin-top:12px}
+.champ .nums b{font-family:var(--f-k);font-size:1.7rem;line-height:1.1;display:block}
+.champ .nums span{font-size:.7rem;opacity:.75}
+.rank{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.rank li{position:relative;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:11px 14px;border:1px solid var(--line);border-radius:18px;background:var(--glass);overflow:hidden}
+.rank li::before{content:"";position:absolute;inset:0 0 0 auto;width:var(--w);background:linear-gradient(270deg,rgba(227,195,106,.2),transparent);transition:width 1.2s .3s}
+section:not(.in) .rank li::before{width:0}
+.rank .n{position:relative;font-family:var(--f-k);font-weight:700;font-size:1.25rem;color:var(--gold)}
+.rank .t{position:relative;font-family:var(--f-d);font-size:1.05rem;line-height:1.4}
+.rank .t small{display:block;font-family:var(--f-b);font-size:.68rem;color:var(--faint)}
+.rank .v{position:relative;font-family:var(--f-k);color:var(--gold-hi);font-size:.95rem;text-align:end}
+.rank .v i{font-style:normal;font-family:var(--f-b);font-size:.7rem;color:var(--muted)}.rank .v small{display:block;font-family:var(--f-b);font-size:.64rem;color:var(--faint)}
+
+/* clock */
+.clock{display:grid;place-items:center}
+.clock svg{width:min(100%,300px);height:auto;overflow:visible}
+.clock .ray{transform-box:fill-box;transform-origin:50% 100%;scale:1 0;transition:scale .9s cubic-bezier(.2,.9,.2,1)}
+.in .clock .ray{scale:1 1}
+.note{text-align:center;font-size:.8rem;color:var(--muted);margin-top:6px}
+
+/* gauges */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g{text-align:center;padding:16px 8px 12px}.g .rw{position:relative;width:118px;margin:0 auto}
+.g svg{width:118px;height:auto;display:block}
+.g circle.v{stroke-dasharray:var(--len) 400;transition:stroke-dasharray 1.4s .2s cubic-bezier(.2,.8,.2,1)}
+section:not(.in) .g circle.v{stroke-dasharray:0 400}
+.g b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-k);font-size:1.6rem;color:var(--gold-hi)}
+.g span{display:block;margin-top:10px;font-size:.74rem;color:var(--muted)}
+
+/* features */
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.f{border:1px solid var(--line);border-radius:18px;background:var(--glass);padding:12px 13px}
+.f .i{font-size:1.15rem}
+.f b{display:block;font-family:var(--f-k);font-size:1.35rem;color:var(--gold-hi);line-height:1.3}
+.f span{font-size:.72rem;color:var(--muted)}
+.f .m{height:3px;border-radius:3px;background:rgba(255,236,190,.1);margin-top:8px;overflow:hidden}
+.f .m u{display:block;height:100%;width:var(--w);background:linear-gradient(270deg,#F3DC97,#B98F38);border-radius:3px;transition:width 1.2s .3s}
+section:not(.in) .f .m u{width:0}
+
+/* sources */
+.stack{display:flex;height:16px;border-radius:99px;overflow:hidden;gap:3px;direction:rtl}
+.stack i{height:100%;border-radius:4px;flex:var(--p)}
+.leg{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:14px;font-size:.82rem}
+.leg div{display:flex;align-items:center;gap:8px}.leg u{width:9px;height:9px;border-radius:3px;flex:none}
+.leg b{margin-inline-start:auto;font-family:var(--f-k);color:var(--gold-hi)}
+
+/* errors */
+.alert{border-color:rgba(235,133,115,.3);background:linear-gradient(160deg,rgba(235,133,115,.1),rgba(235,133,115,.02))}
+.e{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;padding:9px 0;border-top:1px solid rgba(235,133,115,.16);font-size:.85rem}
+.e:first-child{border-top:0;padding-top:0}.e:last-child{padding-bottom:0}
+.e u{width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 10px var(--bad)}
+.e b{font-family:var(--f-b);font-weight:600;color:var(--bad)}.e small{grid-column:2/-1;color:var(--faint);font-size:.7rem}
+footer{margin-top:30px;text-align:center;color:var(--faint);font-size:.7rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}section{opacity:1;translate:none}.chart .ln{stroke-dashoffset:0}.chart .ar{opacity:1}.clock .ray{scale:1}}
+
+.live b{font-family:var(--f-k)}
+.hero .delta.dn{background:var(--bad)}.hero .delta:empty{display:none}
+.empty{text-align:center;color:var(--faint);font-size:.82rem;padding:14px 6px}
+.okmsg{text-align:center;color:var(--ok);font-size:.86rem;padding:8px}
+.sub2{font-size:.72rem;color:var(--faint);margin:14px 0 8px}
+.rf{font:inherit;font-size:.74rem;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:99px;padding:6px 16px;cursor:pointer;margin-top:12px}
+body.busy .hero .big,body.busy .tile b{opacity:.35}
+.msg{margin:14px 0 0;border:1px solid rgba(235,133,115,.35);background:rgba(235,133,115,.08);color:#F3B6AA;border-radius:16px;padding:10px 14px;font-size:.82rem;text-align:center}
+.msg[hidden]{display:none}
+.champ .nums b{min-width:2ch}
+</style>
+</head>
+<body class="busy">
+<div class="sky" id="sky"></div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand gt">نَبَأٌ عَظِيم</div>
+    <div class="live"><u></u>اليوم <b class="gt" id="today">–</b> زائر</div>
+  </div>
+  <div class="msg" id="msg" hidden></div>
+
+  <div class="hero">
+    <svg class="star" viewBox="-100 -100 200 200" fill="none" stroke="#E3C36A" stroke-width=".7"><g id="st"></g></svg>
+    <div class="lab" id="heroLab">وقت الاستماع</div>
+    <div class="big" id="heroNum">٠</div>
+    <div class="unit gt" id="heroUnit">ساعة من القرآن</div>
+    <div><span class="delta" id="heroDelta"></span></div>
+    <div><div class="seg" id="seg"><button data-r="1">اليوم</button><button data-r="7" class="on">٧ أيام</button><button data-r="30">٣٠ يوم</button><button data-r="0">الكل</button></div></div>
+  </div>
+
+  <div class="bento">
+    <div class="tile"><b id="kVis">٠</b><span>زائر</span></div>
+    <div class="tile"><b id="kPlay">٠</b><span>تشغيل</span></div>
+    <div class="tile"><b id="kAvg">٠</b><span>دقيقة للمستمع</span></div>
+  </div>
+
+  <section>
+    <div class="h"><h2>نبض الزوار</h2><small id="chartSub">الزوار كل يوم</small></div>
+    <div class="panel chart">
+      <div class="peak" id="peak"></div>
+      <svg viewBox="0 0 320 150" id="area"></svg>
+      <div class="days" id="days"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h2>الأكثر استماعًا</h2><small>بعدد المستمعين</small></div>
+    <div id="top"></div>
+  </section>
+
+  <section>
+    <div class="h"><h2>ساعة الاستماع</h2><small>٢٤ ساعة</small></div>
+    <div class="panel clock">
+      <svg viewBox="-150 -150 300 300" id="clock"></svg>
+      <div class="note" id="clockNote"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h2>الوفاء</h2><small>هل يرجعون؟</small></div>
+    <div class="duo">
+      <div class="panel g"><div class="rw"><svg viewBox="0 0 120 120"><defs><linearGradient id="gg"><stop stop-color="#FBEFC6"/><stop offset="1" stop-color="#B98F38"/></linearGradient></defs><circle cx="60" cy="60" r="50" stroke="rgba(255,236,190,.1)" stroke-width="9" fill="none"/><circle class="v" id="gBack" style="--len:0" cx="60" cy="60" r="50" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"/></svg><b id="gBackT">–</b></div><span>زوار راجعين (مو أول مرة)</span></div>
+      <div class="panel g"><div class="rw"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" stroke="rgba(255,236,190,.1)" stroke-width="9" fill="none"/><circle class="v" id="gEnd" style="--len:0" cx="60" cy="60" r="50" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"/></svg><b id="gEndT">–</b></div><span>يكمّلون التلاوة لآخرها</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h2>الميزات</h2><small>عدد المستخدمين</small></div>
+    <div class="feat" id="feat"></div>
+  </section>
+
+  <section>
+    <div class="h"><h2>من وين يجون؟</h2><small>المصادر والأجهزة</small></div>
+    <div class="panel" id="src"></div>
+  </section>
+
+  <section>
+    <div class="h"><h2>تحتاج انتباه</h2><small>أخطاء التشغيل</small></div>
+    <div class="panel" id="errs"></div>
+  </section>
+
+  <footer><div id="upd"></div><button class="rf" id="rf">↻ تحديث الآن</button><div style="margin-top:10px">بدون أي أسماء أو بيانات شخصية</div></footer>
+</div>
+<script>
+/* Private statistics page for «نبأ عظيم». Reads GoatCounter through a read-only token (statistics only). */
+const API = "https://qatami.goatcounter.com/api/v0/", TOKEN = "1chh9xicxa1jazrv1ipo9sv6ls5t4hf9oo7dho5mnawad6yp0", LAUNCH = "2026-11-01";
+const NS = "http://www.w3.org/2000/svg", $ = id => document.getElementById(id);
+const ar = n => Math.round(n).toLocaleString("ar-EG"), ar1 = n => n.toLocaleString("ar-EG", { maximumFractionDigits: 1 });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p && p.appendChild(e); return e; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ymd = d => d.toLocaleDateString("en-CA");
+/* exact local day edges; a bare date would be cut at midnight UTC */
+const iso = (d, endOfDay) => { const x = new Date(d); endOfDay ? x.setHours(23, 59, 59, 0) : x.setHours(0, 0, 0, 0); return x.toISOString().slice(0, 19) + "Z"; };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+
+/* ---- decoration ---- */
+const sky = $("sky");
+for (let i = 0; i < 42; i++) { const s = document.createElement("i"); s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;--d:${2 + Math.random() * 5}s;animation-delay:${-Math.random() * 5}s`; sky.appendChild(s); }
+for (let k = 0; k < 8; k++) el("rect", { x: -62, y: -62, width: 124, height: 124, transform: `rotate(${k * 11.25})` }, $("st"));
+for (const r of [94, 88, 40]) el("circle", { r }, $("st"));
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .12 });
+document.querySelectorAll("section").forEach(s => io.observe(s));
+function countTo(e, to, fmt) { fmt = fmt || ar; const t0 = performance.now(), d = 1200; (function f(t) { const p = Math.min(1, (t - t0) / d); e.textContent = fmt(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f); else e.textContent = fmt(to); })(t0); }
+
+/* ---- data ---- */
+let lastCall = 0;
+async function api(path) {
+  const wait = 300 - (Date.now() - lastCall); if (wait > 0) await sleep(wait);   /* the service allows 4 requests a second */
+  lastCall = Date.now();
+  const r = await fetch(API + path, { headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/json" } });
+  if (r.status === 429) { await sleep(1200); return api(path); }
+  if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "auth" : "http " + r.status);
+  return r.json();
+}
+async function allHits(q) {
+  let out = [], ex = [];
+  for (let i = 0; i < 12; i++) {
+    const d = await api("stats/hits?limit=100&" + q + ex.map(id => "&exclude_paths=" + id).join(""));
+    out = out.concat(d.hits || []); if (!d.more || !(d.hits || []).length) break;
+    ex = out.map(h => h.path_id);
+  }
+  return out;
+}
+/* minutes are sent as steps of each device's running total: 1,2,3,5,10,15,20,30,45,60 then every 30 */
+const STEPS = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
+function stepSize(m) { const i = STEPS.indexOf(m); if (i > 0) return m - STEPS[i - 1]; if (i === 0) return 1; return m > 60 && m % 30 === 0 ? 30 : 0; }
+function digest(hits, days) {
+  const D = { minutes: 0, listeners: 0, plays: 0, ends: 0, fresh: 0, back: 0, tracks: new Map(), feats: [], errs: [], tour: { done: 0, all: 0 },
+    hours: Array(24).fill(0), daily: Object.fromEntries(days.map(d => [d, { v: 0, pv: 0 }])) };
+  const track = (key, title) => { let t = D.tracks.get(key); if (!t) D.tracks.set(key, t = { key, title: title || key, listeners: 0, plays: 0, ends: 0 }); if (title && title !== key) t.title = title; return t; };
+  for (const h of hits) {
+    const p = h.path || "", c = h.count || 0, i = p.indexOf("/"), kind = h.event ? p.slice(0, i) : "", rest = p.slice(i + 1);
+    const perDay = f => (h.stats || []).forEach(s => { if (D.daily[s.day]) f(D.daily[s.day], s.daily || 0); });
+    if (!h.event) { perDay((d, n) => { d.pv = Math.max(d.pv, n); }); continue; }
+    if (kind === "listen") { const m = +rest; D.minutes += c * stepSize(m); if (m === 1) D.listeners = c; }
+    else if (kind === "play") { D.plays += c; track(rest, h.title).plays += c; (h.stats || []).forEach(s => { if (D.daily[s.day]) (s.hourly || []).forEach((n, hr) => D.hours[hr] += n); }); }
+    else if (kind === "min") track(rest, h.title).listeners += c;
+    else if (kind === "end") { D.ends += c; track(rest, h.title).ends += c; }
+    else if (kind === "visit") { if (rest === "back") D.back += c; else D.fresh += c; perDay((d, n) => { d.v += n; }); }
+    else if (kind === "feature") D.feats.push({ key: rest, n: c });
+    else if (kind === "err") D.errs.push({ key: rest, title: h.title || rest, n: c, last: ((h.stats || []).filter(s => s.daily > 0).pop() || {}).day });
+    else if (kind === "tour") { D.tour.all += c; if (rest === "finished") D.tour.done += c; }
+  }
+  D.series = days.map(d => Math.max(D.daily[d].v, D.daily[d].pv));
+  D.visitors = D.series.reduce((a, b) => a + b, 0);
+  /* before the step counter existed, fall back to "listened a minute or more" */
+  if (!D.listeners) D.listeners = Math.max(0, ...[...D.tracks.values()].map(t => t.listeners));
+  if (!D.minutes) D.minutes = [...D.tracks.values()].reduce((a, t) => a + t.listeners, 0);
+  return D;
+}
+
+/* ---- drawing ---- */
+const WD = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+function drawArea(vals, days) {
+  const svg = $("area"); svg.textContent = "";
+  const W = 320, top = 44, bot = 138, max = Math.max(1, ...vals), n = vals.length;
+  const pts = vals.map((v, i) => [n === 1 ? W / 2 : 8 + i * (W - 16) / (n - 1), bot - (v / max) * (bot - top)]);
+  let p = `M${pts[0][0]},${pts[0][1]}`; for (let i = 1; i < n; i++) { const a = pts[i - 1], b = pts[i], mx = (a[0] + b[0]) / 2; p += ` C${mx},${a[1]} ${mx},${b[1]} ${b[0]},${b[1]}`; }
+  const df = el("defs", {}, svg), g = el("linearGradient", { id: "af", x1: 0, y1: 0, x2: 0, y2: 1 }, df); el("stop", { "stop-color": "#E3C36A", "stop-opacity": .45 }, g); el("stop", { offset: 1, "stop-color": "#E3C36A", "stop-opacity": 0 }, g);
+  const f = el("filter", { id: "gl", x: "-20%", y: "-50%", width: "140%", height: "200%" }, df); el("feGaussianBlur", { stdDeviation: 4 }, f);
+  for (let i = 0; i < 4; i++) el("line", { x1: 0, x2: W, y1: top + i * (bot - top) / 3, y2: top + i * (bot - top) / 3, stroke: "rgba(255,236,190,.07)", "stroke-dasharray": "2 5" }, svg);
+  if (n > 1) {
+    el("path", { d: p + ` L${pts[n - 1][0]},${bot} L${pts[0][0]},${bot}Z`, fill: "url(#af)", class: "ar" }, svg);
+    el("path", { d: p, stroke: "#E3A046", "stroke-width": 5, fill: "none", filter: "url(#gl)", opacity: .7, class: "ln" }, svg);
+    el("path", { d: p, stroke: "#FBEFC6", "stroke-width": 2.4, fill: "none", "stroke-linecap": "round", class: "ln" }, svg);
+  }
+  pts.forEach((q, i) => { const last = i === n - 1; if (n <= 14 || last) el("circle", { cx: q[0], cy: q[1], r: last ? 5.5 : 3, fill: last ? "#FBEFC6" : "#0E0A06", stroke: "#E3C36A", "stroke-width": 1.6, class: "ar" }, svg); });
+  const l = pts[n - 1], c = el("circle", { cx: l[0], cy: l[1], r: 6, fill: "none", stroke: "#FBEFC6", "stroke-width": 1.2, class: "ar" }, svg);
+  el("animate", { attributeName: "r", values: "6;16", dur: "1.8s", repeatCount: "indefinite" }, c); el("animate", { attributeName: "stroke-opacity", values: ".8;0", dur: "1.8s", repeatCount: "indefinite" }, c);
+  const lab = d => { const x = new Date(d + "T12:00:00"); return n <= 7 ? WD[x.getDay()] : x.toLocaleDateString("ar-SA-u-ca-gregory-nu-arab", { day: "numeric", month: "numeric" }); };
+  const pick = n <= 7 ? days : [days[0], days[Math.floor((n - 1) / 2)], days[n - 1]];
+  $("days").innerHTML = pick.map(d => `<span>${lab(d)}</span>`).join("");
+  const mi = vals.indexOf(Math.max(...vals)), md = new Date(days[mi] + "T12:00:00");
+  $("peak").innerHTML = Math.max(...vals) > 0 ? `<b>${ar(vals[mi])}</b>أعلى يوم · ${n <= 7 ? WD[md.getDay()] : lab(days[mi])}` : "";
+}
+const hourName = h => { const x = h % 12 || 12; return ar(x) + (h < 12 ? " ص" : " م"); };
+function drawClock(hrs) {
+  const svg = $("clock"); svg.textContent = ""; const max = Math.max(...hrs), peak = hrs.indexOf(max);
+  const df = el("defs", {}, svg), g = el("linearGradient", { id: "rg", x1: 0, y1: 1, x2: 0, y2: 0 }, df); el("stop", { "stop-color": "#8F6A22" }, g); el("stop", { offset: 1, "stop-color": "#FBEFC6" }, g);
+  el("circle", { r: 52, fill: "none", stroke: "rgba(227,195,106,.25)" }, svg); el("circle", { r: 140, fill: "none", stroke: "rgba(227,195,106,.1)", "stroke-dasharray": "1 6" }, svg);
+  hrs.forEach((n, h) => { const v = max ? n / max : 0, len = 8 + v * 76, gr = el("g", { transform: `rotate(${h * 15})` }, svg), top = max > 0 && h === peak;
+    const r = el("rect", { x: -5.5, y: -(58 + len), width: 11, height: len, rx: 5.5, fill: top ? "#FBEFC6" : "url(#rg)", opacity: n ? .4 + v * .6 : .16, class: "ray" }, gr); r.style.transitionDelay = (h * 30) + "ms";
+    if (top) r.setAttribute("filter", "drop-shadow(0 0 6px #E3A046)"); });
+  [["١٢ ص", 0], ["٦ ص", 90], ["١٢ م", 180], ["٦ م", 270]].forEach(([t, a]) => { const rad = (a - 90) * Math.PI / 180, tx = el("text", { x: Math.cos(rad) * 146, y: Math.sin(rad) * 146 + 4, "text-anchor": "middle", "font-size": 10, fill: "#7D6A48", "font-family": "IBM Plex Sans Arabic" }, svg); tx.textContent = t; });
+  const a = el("text", { y: max ? -4 : 4, "text-anchor": "middle", "font-size": max ? 26 : 12, "font-weight": 700, fill: max ? "#FBEFC6" : "#7D6A48", "font-family": max ? "Reem Kufi" : "IBM Plex Sans Arabic" }, svg); a.textContent = max ? ar(peak % 12 || 12) : "لا بيانات بعد";
+  if (max) { const b = el("text", { y: 16, "text-anchor": "middle", "font-size": 10, fill: "#BFAA80", "font-family": "IBM Plex Sans Arabic" }, svg); b.textContent = (peak < 12 ? "صباحًا" : "مساءً") + " · الذروة"; }
+  $("clockNote").innerHTML = max ? `أكثر وقت تشغيل <b class="gt">${hourName(peak)} – ${hourName((peak + 1) % 24)}</b>` : "تظهر أول ما يبدأ الناس يشغّلون";
+}
+function gauge(id, part, whole) { const p = whole ? part / whole : 0; $(id).style.setProperty("--len", (p * 314).toFixed(0)); $(id + "T").textContent = whole ? ar(p * 100) + "٪" : "–"; }
+const FEAT = { fav: ["♡", "المفضلة"], offline: ["⤓", "بدون نت"], "video-tag": ["▶", "المرئي"], "sleep-timer": ["☾", "مؤقت النوم"], card: ["▣", "بطاقة التلاوة"], share: ["↗", "المشاركة"], list: ["☰", "القوائم"], theme: ["◐", "تغيير المظهر"], "tour-open": ["✦", "فتحوا الجولة"] };
+const REF = n => !n ? "رابط مباشر" : /whatsapp|wa\.me/i.test(n) ? "واتساب" : /google/i.test(n) ? "بحث قوقل" : /t\.co|twitter|x\.com/i.test(n) ? "تويتر / X" : /telegram|t\.me/i.test(n) ? "تيليجرام" : /instagram/i.test(n) ? "إنستقرام" : /snapchat/i.test(n) ? "سناب" : /facebook/i.test(n) ? "فيسبوك" : /youtube/i.test(n) ? "يوتيوب" : n;
+const SHADES = ["#FBEFC6", "#E3C36A", "#B98F38", "#6E5220", "#4A3716"];
+function stackHtml(rows) {
+  const tot = rows.reduce((a, r) => a + r.n, 0); if (!tot) return '<div class="empty">لا بيانات بعد</div>';
+  const top = rows.slice(0, 4), rest = rows.slice(4).reduce((a, r) => a + r.n, 0); if (rest) top.push({ name: "أخرى", n: rest });
+  return `<div class="stack">${top.map((r, i) => `<i style="--p:${r.n};background:${SHADES[i]}"></i>`).join("")}</div><div class="leg">${top.map((r, i) => `<div><u style="background:${SHADES[i]}"></u>${esc(r.name)}<b>${ar(r.n / tot * 100)}٪</b></div>`).join("")}</div>`;
+}
+function render(D, P, days, refs, systems, range) {
+  /* hero: minutes until two hours, then hours */
+  const big = D.minutes >= 120, val = big ? D.minutes / 60 : D.minutes;
+  $("heroLab").textContent = "وقت الاستماع · " + ({ 1: "اليوم", 7: "آخر ٧ أيام", 30: "آخر ٣٠ يوم", 0: "منذ البداية" })[range];
+  $("heroUnit").textContent = (big ? "ساعة" : "دقيقة") + " من القرآن";
+  countTo($("heroNum"), val, big && val < 20 ? ar1 : ar);
+  const dl = $("heroDelta"); dl.textContent = ""; dl.className = "delta";
+  if (P && P.minutes > 0) { const ch = (D.minutes - P.minutes) / P.minutes * 100; dl.textContent = (ch >= 0 ? "▲ " : "▼ ") + ar(Math.abs(ch)) + "٪ عن الفترة اللي قبلها"; if (ch < 0) dl.classList.add("dn"); }
+  countTo($("kVis"), D.visitors); countTo($("kPlay"), D.plays); countTo($("kAvg"), D.listeners ? D.minutes / D.listeners : 0);
+  $("today").textContent = ar(D.series[D.series.length - 1] || 0);
+  const cd = range === 1 ? days.slice(-7) : days, cv = range === 1 ? D.week : D.series;
+  $("chartSub").textContent = range === 1 ? "آخر ٧ أيام" : "الزوار كل يوم"; drawArea(cv, cd);
+  /* top recitations */
+  const tr = [...D.tracks.values()].filter(t => t.listeners || t.plays).sort((a, b) => b.listeners - a.listeners || b.plays - a.plays).slice(0, 5);
+  if (!tr.length) $("top").innerHTML = '<div class="panel"><div class="empty">ما فيه استماع في هذي الفترة بعد</div></div>';
+  else { const c = tr[0], mx = Math.max(1, c.listeners, c.plays), pc = t => t.plays ? ar(Math.min(100, t.ends / t.plays * 100)) + "٪" : "–";
+    $("top").innerHTML = `<div class="champ"><span class="tag">♛ الأولى</span><div class="name">${esc(c.title)}</div><div class="nums"><div><b>${ar(c.listeners)}</b><span>مستمع</span></div><div><b>${ar(c.plays)}</b><span>تشغيل</span></div><div><b>${pc(c)}</b><span>كمّلوها</span></div></div></div>`
+      + (tr.length > 1 ? `<ol class="rank">${tr.slice(1).map((t, i) => `<li style="--w:${Math.max(6, Math.max(t.listeners, t.plays) / mx * 100)}%"><span class="n">${ar(i + 2)}</span><div class="t">${esc(t.title)}</div><div class="v">${ar(t.listeners)} <i>مستمع</i><small>${ar(t.plays)} تشغيل</small></div></li>`).join("")}</ol>` : ""); }
+  drawClock(D.hours);
+  gauge("gBack", D.back, D.back + D.fresh); gauge("gEnd", Math.min(D.ends, D.plays), D.plays);
+  /* features */
+  const fs = D.feats.filter(f => FEAT[f.key] && f.n).sort((a, b) => b.n - a.n), fm = Math.max(1, ...fs.map(f => f.n));
+  let fh = fs.map(f => `<div class="f"><div class="i">${FEAT[f.key][0]}</div><b>${ar(f.n)}</b><span>${FEAT[f.key][1]}</span><div class="m"><u style="--w:${f.n / fm * 100}%"></u></div></div>`).join("");
+  if (D.tour.all) fh += `<div class="f"><div class="i">✦</div><b>${ar(D.tour.done / D.tour.all * 100)}٪</b><span>كمّلوا الجولة</span><div class="m"><u style="--w:${D.tour.done / D.tour.all * 100}%"></u></div></div>`;
+  $("feat").innerHTML = fh || '<div class="panel" style="grid-column:1/-1"><div class="empty">لا بيانات بعد</div></div>';
+  /* sources and devices */
+  const merge = rows => { const m = new Map(); rows.forEach(r => m.set(r.name, (m.get(r.name) || 0) + r.n)); return [...m].map(([name, n]) => ({ name, n })).sort((a, b) => b.n - a.n); };
+  $("src").innerHTML = stackHtml(merge(refs.map(r => ({ name: REF(r.name), n: r.count })))) + '<div class="sub2">الأجهزة</div>' + stackHtml(merge(systems.map(r => ({ name: r.name || "غير معروف", n: r.count }))));
+  /* errors */
+  const er = D.errs.filter(e => e.n).sort((a, b) => b.n - a.n).slice(0, 6);
+  $("errs").className = "panel" + (er.length ? " alert" : "");
+  $("errs").innerHTML = er.length ? er.map(e => `<div class="e"><u></u><span>${esc(e.title)}</span><b>${e.n === 1 ? "مرة" : ar(e.n) + " مرات"}</b><small>${e.last ? "آخر مرة " + new Date(e.last + "T12:00:00").toLocaleDateString("ar-SA-u-ca-gregory-nu-arab", { weekday: "long", day: "numeric", month: "long" }) : ""}</small></div>`).join("") : '<div class="okmsg">✓ ما فيه أخطاء تشغيل في هذي الفترة</div>';
+}
+
+/* ---- load ---- */
+let range = 7, loading = false;
+async function load() {
+  if (loading) return; loading = true; document.body.classList.add("busy"); $("msg").hidden = true;
+  try {
+    const now = new Date(), span = range || Math.max(1, Math.round((new Date(ymd(now)) - new Date(LAUNCH)) / 864e5) + 1);
+    const fetchDays = Math.max(span, 7);   /* the chart always needs a week */
+    const start = addDays(now, -(fetchDays - 1)), end = now;
+    const all = Array.from({ length: fetchDays }, (_, i) => ymd(addDays(start, i))), days = all.slice(-span);
+    const hits = await allHits(`start=${iso(start)}&end=${iso(end, 1)}`);
+    /* cut each path down to the chosen days */
+    const inRange = hits.map(h => { const st = (h.stats || []).filter(s => days.includes(s.day)); return Object.assign({}, h, { stats: st, count: span === fetchDays ? h.count : st.reduce((a, s) => a + (s.daily || 0), 0) }); });
+    const D = digest(inRange, days); D.week = digest(hits, all.slice(-7)).series;
+    let P = null;
+    if (range) { const ps = addDays(start, -span + (fetchDays - span)), pe = addDays(now, -span); try { P = digest(await allHits(`start=${iso(ps)}&end=${iso(pe, 1)}`), []); } catch {} }
+    const q = `start=${iso(addDays(now, -(span - 1)))}&end=${iso(end, 1)}`;
+    const refs = (await api("stats/toprefs?" + q)).stats || [], systems = (await api("stats/systems?" + q)).stats || [];
+    render(D, P, range === 1 ? all : days, refs, systems, range);
+    $("upd").textContent = "آخر تحديث " + now.toLocaleTimeString("ar-SA-u-nu-arab", { hour: "numeric", minute: "2-digit" });
+  } catch (e) {
+    $("msg").hidden = false;
+    $("msg").textContent = e.message === "auth" ? "مفتاح القراءة ما عاد يشتغل، يحتاج مفتاح جديد من GoatCounter." : navigator.onLine === false ? "ما فيه اتصال بالنت." : "ما قدرت أجيب الأرقام الحين، جرّب بعد شوي.";
+  }
+  loading = false; document.body.classList.remove("busy");
+}
+$("seg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; range = +b.dataset.r; document.querySelectorAll("#seg button").forEach(x => x.classList.toggle("on", x === b)); load(); });
+$("rf").onclick = load;
+load(); setInterval(() => { if (!document.hidden) load(); }, 5 * 60e3);
+</script>
+</body>
+</html>

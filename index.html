@@ -2313,6 +2313,22 @@ function statView() {
     document.head.appendChild(sc);
   } catch {}
   statView(); addEventListener("hashchange", () => setTimeout(statView, 60));
+  /* one visit a day per device: first ever (new) or came back on another day (back) */
+  try {
+    const day = new Date().toLocaleDateString("en-CA"), seen = localStorage.getItem("qtm-stat-day");
+    if (seen !== day) { stat(seen ? "visit/back" : "visit/new"); localStorage.setItem("qtm-stat-day", day); }
+  } catch {}
+  /* total listening: the counter repeats a path only once per visit, so minutes are sent as steps
+     (1, 2, 3, 5, 10 ... then every 30) of this device's running total; it restarts after 12 quiet hours */
+  const STEPS = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
+  function listenMin() {
+    try {
+      let o = JSON.parse(localStorage.getItem("qtm-stat-listen") || "null"); const now = Date.now();
+      if (!o || now - o.t > 12 * 3600e3) o = { m: 0 };
+      o.m++; o.t = now; localStorage.setItem("qtm-stat-listen", JSON.stringify(o));
+      if (STEPS.includes(o.m) || (o.m > 60 && o.m % 30 === 0)) stat("listen/" + o.m);
+    } catch {}
+  }
   /* plays: once each time a recitation starts */
   let last = "", acc = 0, lastT = 0;
   audio.addEventListener("playing", () => {
@@ -2324,7 +2340,7 @@ function statView() {
   audio.addEventListener("timeupdate", () => {
     const r = player.cur; if (!r || audio.paused) return;
     const d = audio.currentTime - lastT; lastT = audio.currentTime;
-    if (d > 0 && d < 3) { acc += d; if (acc >= 60) { acc -= 60; stat("min/" + r.key, r.title); } }
+    if (d > 0 && d < 3) { acc += d; if (acc >= 60) { acc -= 60; stat("min/" + r.key, r.title); listenMin(); } }
   });
   audio.addEventListener("seeked", () => { lastT = audio.currentTime; });
   audio.addEventListener("error", () => { const r = player.cur; if (r) stat("err/" + r.key, r.title); });
