@@ -250,13 +250,16 @@ function countTo(e, to, fmt) { fmt = fmt || ar; const t0 = performance.now(), d 
 
 /* ---- data ---- */
 let lastCall = 0;
-async function api(path) {
+async function api(path, tries = 4) {
   const wait = 300 - (Date.now() - lastCall); if (wait > 0) await sleep(wait);   /* the service allows 4 requests a second */
   lastCall = Date.now();
-  const r = await fetch(API + path, { headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/json" } });
-  if (r.status === 429) { await sleep(1200); return api(path); }
-  if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "auth" : "http " + r.status);
-  return r.json();
+  let r;
+  try { r = await fetch(API + path, { mode: "cors", credentials: "omit", cache: "no-store", headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/json" } }); }
+  catch (e) { if (tries > 1) { await sleep(900 * (5 - tries)); return api(path, tries - 1); } throw new Error("net"); }   /* no answer at all: phone network, blocker or the service is busy */
+  if (r.status === 401 || r.status === 403) throw new Error("auth");
+  if (r.status === 429 || r.status >= 500) { if (tries > 1) { await sleep(1200 * (5 - tries)); return api(path, tries - 1); } throw new Error("http " + r.status); }
+  if (!r.ok) throw new Error("http " + r.status);
+  try { return await r.json(); } catch { throw new Error("json"); }
 }
 async function allHits(q) {
   let out = [], ex = [];
@@ -389,26 +392,38 @@ async function loadNow() {
 
 /* ---- load ---- */
 let range = 7, loading = false;
+const CK = "qtm-stats-cache-";
+const saveCache = o => { try { localStorage.setItem(CK + range, JSON.stringify(o)); } catch {} };
+const readCache = () => { try { return JSON.parse(localStorage.getItem(CK + range) || "null"); } catch { return null; } };
+const WHY = { auth: "مفتاح القراءة ما عاد يشتغل، يحتاج مفتاح جديد من GoatCounter.", net: "ما وصلت لخدمة الإحصاءات (الشبكة أو حاجب إعلانات؟)", json: "رجع رد غريب من خدمة الإحصاءات." };
+function showFrom(hits, prevHits, refs, systems, now) {
+  const span = range || Math.max(1, Math.round((new Date(ymd(now)) - new Date(LAUNCH)) / 864e5) + 1), fetchDays = Math.max(span, 7), start = addDays(now, -(fetchDays - 1));
+  const all = Array.from({ length: fetchDays }, (_, i) => ymd(addDays(start, i))), days = all.slice(-span);
+  /* cut each path down to the chosen days */
+  const inRange = hits.map(h => { const st = (h.stats || []).filter(s => days.includes(s.day)); return Object.assign({}, h, { stats: st, count: span === fetchDays ? h.count : st.reduce((a, s) => a + (s.daily || 0), 0) }); });
+  const D = digest(inRange, days); D.week = digest(hits, all.slice(-7)).series;
+  render(D, prevHits ? digest(prevHits, []) : null, range === 1 ? all : days, refs, systems, range);
+}
 async function load() {
   if (loading) return; loading = true; document.body.classList.add("busy"); $("msg").hidden = true;
+  const now = new Date();
   try {
-    const now = new Date(), span = range || Math.max(1, Math.round((new Date(ymd(now)) - new Date(LAUNCH)) / 864e5) + 1);
-    const fetchDays = Math.max(span, 7);   /* the chart always needs a week */
-    const start = addDays(now, -(fetchDays - 1)), end = now;
-    const all = Array.from({ length: fetchDays }, (_, i) => ymd(addDays(start, i))), days = all.slice(-span);
-    const hits = await allHits(`start=${iso(start)}&end=${iso(end, 1)}`);
-    /* cut each path down to the chosen days */
-    const inRange = hits.map(h => { const st = (h.stats || []).filter(s => days.includes(s.day)); return Object.assign({}, h, { stats: st, count: span === fetchDays ? h.count : st.reduce((a, s) => a + (s.daily || 0), 0) }); });
-    const D = digest(inRange, days); D.week = digest(hits, all.slice(-7)).series;
-    let P = null;
-    if (range) { const ps = addDays(start, -span + (fetchDays - span)), pe = addDays(now, -span); try { P = digest(await allHits(`start=${iso(ps)}&end=${iso(pe, 1)}`), []); } catch {} }
+    const span = range || Math.max(1, Math.round((new Date(ymd(now)) - new Date(LAUNCH)) / 864e5) + 1), fetchDays = Math.max(span, 7), start = addDays(now, -(fetchDays - 1)), end = now;
+    const hits = await allHits(`start=${iso(start)}&end=${iso(end, 1)}`);   /* the only call the page cannot do without */
+    let prev = null, refs = [], systems = [];
+    if (range) { const ps = addDays(start, -span + (fetchDays - span)), pe = addDays(now, -span); try { prev = await allHits(`start=${iso(ps)}&end=${iso(pe, 1)}`); } catch {} }
     const q = `start=${iso(addDays(now, -(span - 1)))}&end=${iso(end, 1)}`;
-    const refs = (await api("stats/toprefs?" + q)).stats || [], systems = (await api("stats/systems?" + q)).stats || [];
-    render(D, P, range === 1 ? all : days, refs, systems, range);
+    try { refs = (await api("stats/toprefs?" + q)).stats || []; } catch {}
+    try { systems = (await api("stats/systems?" + q)).stats || []; } catch {}
+    showFrom(hits, prev, refs, systems, now);
+    saveCache({ t: now.getTime(), hits, prev, refs, systems });
     $("upd").textContent = "آخر تحديث " + now.toLocaleTimeString("ar-SA-u-nu-arab", { hour: "numeric", minute: "2-digit" });
   } catch (e) {
+    const c = readCache(), why = WHY[e.message] || (/^http/.test(e.message) ? "خدمة الإحصاءات مشغولة (" + e.message + ")" : "خطأ في الصفحة نفسها: " + e.message);
     $("msg").hidden = false;
-    $("msg").textContent = e.message === "auth" ? "مفتاح القراءة ما عاد يشتغل، يحتاج مفتاح جديد من GoatCounter." : navigator.onLine === false ? "ما فيه اتصال بالنت." : "ما قدرت أجيب الأرقام الحين، جرّب بعد شوي.";
+    $("msg").textContent = navigator.onLine === false ? "ما فيه اتصال بالنت." : why;
+    if (c) { try { showFrom(c.hits, c.prev, c.refs, c.systems, new Date(c.t)); $("msg").textContent += " · هذي آخر أرقام محفوظة من " + new Date(c.t).toLocaleTimeString("ar-SA-u-nu-arab", { hour: "numeric", minute: "2-digit" }); } catch {} }
+    console.error("stats:", e);
   }
   loading = false; document.body.classList.remove("busy");
 }
