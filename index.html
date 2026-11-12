@@ -372,6 +372,26 @@ ol.tracks li::after{content:"";position:absolute;inset:0;z-index:-1;pointer-even
   background-size:250% 100%;background-position:0 0}
 ol.tracks li.press::after{animation:tGlint .75s cubic-bezier(.3,.6,.3,1) forwards}
 
+/* ---------- Ramadan night rows: the moon of that night is the play button ---------- */
+ol.tracks li.moon{padding:12px 12px 12px 6px;border-radius:24px;gap:10px;
+  background:radial-gradient(70% 130% at 100% 50%,color-mix(in srgb,#E3BE6E 26%,transparent),transparent 62%),linear-gradient(150deg,var(--surface),color-mix(in srgb,var(--surface) 78%,var(--brass-soft)))}
+ol.tracks li.moon::before{inset:0;border:0;border-radius:0;opacity:.5;background:
+  radial-gradient(1.2px 1.2px at 22% 28%,var(--brass) 50%,transparent 51%),radial-gradient(1px 1px at 38% 74%,var(--brass) 50%,transparent 51%),radial-gradient(1.4px 1.4px at 9% 60%,var(--brass) 50%,transparent 51%),
+  radial-gradient(1px 1px at 55% 18%,var(--brass) 50%,transparent 51%),radial-gradient(1px 1px at 66% 86%,var(--brass) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 47% 48%,var(--brass) 50%,transparent 51%);animation:moonTw 4s ease-in-out infinite alternate}
+@keyframes moonTw{to{opacity:.15}}
+ol.tracks li.moon .pbtn,ol.tracks li.moon .pbtn:hover,ol.tracks li.moon.playing .pbtn{width:66px;height:66px;display:grid;place-items:center;color:#1A1209}
+ol.tracks li.moon .pbtn::before,ol.tracks li.moon .pbtn::after{content:none}
+ol.tracks li.moon .pbtn svg.mn{width:56px;height:56px;margin:0;overflow:visible;filter:drop-shadow(0 2px 8px rgba(176,134,48,.5));transition:filter .4s}
+ol.tracks li.moon .pbtn svg.mn .dk{fill:color-mix(in srgb,var(--line) 62%,var(--surface));stroke:color-mix(in srgb,var(--line-strong) 50%,transparent)}
+ol.tracks li.moon .pbtn svg.rg{position:absolute;inset:0;width:66px;height:66px;margin:0;rotate:-90deg}
+ol.tracks li.moon .pbtn svg.rg circle{fill:none;stroke:color-mix(in srgb,var(--line-strong) 28%,transparent);stroke-width:2}
+ol.tracks li.moon .pbtn svg.rg circle+circle{stroke:#D9B45E;stroke-width:2.4;stroke-linecap:round}
+ol.tracks li.moon .pbtn .bd{position:absolute;bottom:1px;inset-inline-start:1px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#F3DC97,#E3C36A 45%,#B98F38);color:#1A1209;box-shadow:0 3px 8px rgba(40,26,6,.4)}
+ol.tracks li.moon .pbtn .bd svg{width:11px;height:11px;margin:0}
+ol.tracks li.moon.playing{border-color:#D9B45E;box-shadow:0 0 0 1.5px color-mix(in srgb,#E3C36A 55%,transparent),0 0 30px -10px rgba(227,170,80,.7)}
+ol.tracks li.moon.playing .pbtn svg.mn{animation:moonGlow 2.2s ease-in-out infinite alternate}
+@keyframes moonGlow{to{filter:drop-shadow(0 0 16px rgba(255,214,130,.95))}}
+@media (prefers-reduced-motion:reduce){ol.tracks li.moon::before,ol.tracks li.moon.playing .pbtn svg.mn{animation:none}}
 /* watermark: a faint gold seal with the surah (or night) number */
 .twm{position:absolute;z-index:-1;inset-inline-end:clamp(112px,34%,220px);top:50%;width:132px;height:132px;margin-top:-66px;color:var(--line-strong);opacity:.16;pointer-events:none;display:grid;place-items:center;transition:opacity .4s,transform .8s cubic-bezier(.22,1,.36,1)}
 .twm svg{position:absolute;inset:0;width:100%;height:100%}
@@ -1258,6 +1278,13 @@ $("#themeBtn").onclick = () => {
 };
 
 /* ---------- rendering pieces ---------- */
+/* the moon as it looks on night n of the lunar month: thin crescent first, full in the middle */
+function moonSvg(n) {
+  const R = 28, th = 2 * Math.PI * ((n - .5) / 29.53), k = (1 - Math.cos(th)) / 2, rx = (Math.abs(Math.cos(th)) * R).toFixed(1);
+  return `<svg class="mn" viewBox="-30 -30 60 60" aria-hidden="true"><defs><radialGradient id="mg${n}" cx=".4" cy=".35"><stop stop-color="#FFF8DC"/><stop offset=".7" stop-color="#F1D88E"/><stop offset="1" stop-color="#C9A24B"/></radialGradient></defs>
+    <circle class="dk" r="${R}" stroke-width=".6"/><path d="M0,${-R} A${R},${R} 0 0 1 0,${R} A${rx},${R} 0 0 ${k < .5 ? 0 : 1} 0,${-R}Z" fill="url(#mg${n})"${n <= 15 ? "" : ' transform="scale(-1,1)"'}/>
+    <g fill="rgba(143,106,34,.13)"><circle cx="9" cy="-8" r="4"/><circle cx="14" cy="8" r="2.6"/><circle cx="4" cy="13" r="2"/></g></svg>`;
+}
 function trackRow(r, ctx) {
   const playing = player.cur && player.cur.key === r.key;
   const isFav = favs.has(r.key), isDone = done.has(r.key);
@@ -1265,7 +1292,7 @@ function trackRow(r, ctx) {
   const at = ctx === "surah" ? SURAH_AT.get(curSurahN + "|" + r.key) : 0;
   const sub = [];
   if (at) sub.push(`<span class="tag r">تبدأ عند ${fmt(at)}</span>`);
-  if (r.cat === "ramadan" && r.night) sub.push(`<span class="tag r">${r.nightTo ? "الليالي " + AR(r.night) + "–" + AR(r.nightTo) : "الليلة " + AR(r.night)}</span>`);
+  if (r.cat === "ramadan" && r.night && !(/ليلة|الليالي/.test(r.title) && !at && !extMode)) sub.push(`<span class="tag r">${r.nightTo ? "الليالي " + AR(r.night) + "–" + AR(r.nightTo) : "الليلة " + AR(r.night)}</span>`);
   else if (r.cat === "fard") sub.push(`<span class="tag f">${esc(r.prayer || "من الفروض")}${r.date ? " · " + AR(r.date[0]) + " " + MONTHS[r.date[1] - 1] : ""}</span>`);
   if (ctx !== "collection" && ctx !== "year") sub.push(esc(r.c.title));
   if (r.year && ctx !== "year" && (ctx !== "collection" || r.c.multi)) sub.push(yearLabel(r.year));
@@ -1279,11 +1306,13 @@ function trackRow(r, ctx) {
   if (isDone) sub.push(`<span class="done">✓ استمعت</span>`);
   if (offSaved(r)) sub.push(`<span class="done">⤓ محمّلة</span>`);
   const prog = r.d && pos[r.key] > 5 && !isDone ? Math.min(1, pos[r.key] / r.d) : isDone ? 1 : 0;
+  const moonN = r.cat === "ramadan" && r.night && !at && !extMode ? Math.min(30, r.night) : 0;
   const wmN = r.surah || (r.cat === "ramadan" && r.night) || 0;
   const wm = `<span class="twm" aria-hidden="true"><svg viewBox="0 0 120 120"><g fill="none" stroke="currentColor"><rect x="27" y="27" width="66" height="66" stroke-width="1.6"/><rect x="27" y="27" width="66" height="66" transform="rotate(45 60 60)" stroke-width="1.6"/><circle cx="60" cy="60" r="27" stroke-width="1"/><circle cx="60" cy="60" r="52" stroke-width=".7" stroke-dasharray="2 4"/><rect x="38" y="38" width="44" height="44" transform="rotate(22.5 60 60)" stroke-width=".8"/></g></svg>${wmN ? `<b>${AR(wmN)}</b>` : ""}</span>`;
-  return `<li class="${playing ? "playing" : ""}${isDone ? " heard" : ""}" data-key="${esc(r.key)}">${wm}${prog ? `<i class="tprog" style="--p:${prog.toFixed(3)}" aria-hidden="true"></i>` : ""}
+  return `<li class="${playing ? "playing" : ""}${isDone ? " heard" : ""}${moonN ? " moon" : ""}" data-key="${esc(r.key)}">${moonN ? "" : wm}${prog && !moonN ? `<i class="tprog" style="--p:${prog.toFixed(3)}" aria-hidden="true"></i>` : ""}
     ${extMode ? `<a class="pbtn" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="استمع إلى ${esc(r.title)} في تبويب جديد">${icon("i-play")}</a>`
       : at ? `<button class="pbtn" data-mkgo="${esc(r.key)}" data-t="${at}" aria-label="تشغيل من ${fmt(at)}">${icon("i-play")}</button>`
+      : moonN ? `<button class="pbtn" data-play="${esc(r.key)}" aria-label="تشغيل ${esc(r.title)}">${moonSvg(moonN)}${prog ? `<svg class="rg" viewBox="0 0 66 66" aria-hidden="true"><circle cx="33" cy="33" r="31.5"/><circle cx="33" cy="33" r="31.5" stroke-dasharray="${(prog * 197.9).toFixed(0)} 300"/></svg>` : ""}<span class="bd">${icon(playing && !audio.paused ? "i-pause" : "i-play")}</span></button>`
       : `<button class="pbtn" data-play="${esc(r.key)}" aria-label="تشغيل ${esc(r.title)}">${icon(playing && !audio.paused ? "i-pause" : "i-play")}</button>`}
     <div class="info"><span class="ttl ${isSurahTitle ? "" : "long"}">${esc(r.title)}</span>
       <span class="sub">${sub.join(" · ")}</span></div>
