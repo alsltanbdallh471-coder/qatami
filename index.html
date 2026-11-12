@@ -2838,11 +2838,6 @@ function mediaSession(r) {
       <div class="mkrow"><button class="mkadd" id="fpMkAdd" type="button">${icon("i-mark")}<span>علامة هنا</span><b id="fpMkT">٠:٠٠</b></button><button class="mkpl" data-pl="${esc(r.key)}" type="button" aria-label="أضف إلى قائمة">${icon("i-plus")}<span>قائمة</span></button></div>
       <ul class="mklist" id="fpMarks"></ul>
       ${r.t.idx ? `<h3 class="sec">فهرس الليلة</h3><ol class="fidx" id="fpIdx">${r.t.idx.map(([t, n, sub]) => `<li><button type="button" data-mkgo="${esc(r.key)}" data-t="${t}"><b>${fmt(t)}</b><span>${esc(n)}${sub ? `<small>${esc(sub)}</small>` : ""}</span>${icon("i-play")}</button></li>`).join("")}</ol>` : ""}
-      <div class="ia">
-        <button class="btn" data-card="${esc(r.key)}" type="button">${icon("i-card")}بطاقة مشاركة</button>
-        ${r.year ? `<a class="btn" href="#y-${r.year}-${yk}" data-fpclose>كل تلاوات ${AR(r.year)}هـ</a>` : ""}
-        ${r.fb ? `<a class="btn" href="${esc(r.fb)}" target="_blank" rel="noopener">صفحة المصدر</a>` : ""}
-      </div>
     </div>`;
     paintMarks(); vDock();
     const sk = q("#fpSeek");
