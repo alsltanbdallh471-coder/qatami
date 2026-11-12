@@ -27,7 +27,7 @@ body{margin:0}
   --f-display:"Amiri","Noto Naskh Arabic",serif;
   --f-quran:"Amiri","Noto Naskh Arabic","Traditional Arabic",serif;
   --f-ui:"IBM Plex Sans Arabic","Segoe UI","Tahoma",system-ui,sans-serif;
-  --r:16px; --player-h:132px;
+  --r:16px; --player-h:132px; --bnav:0px;
   --pattern:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23B8913A' stroke-width='.8' opacity='.55'%3E%3Crect x='35' y='35' width='50' height='50'/%3E%3Crect x='35' y='35' width='50' height='50' transform='rotate(45 60 60)'/%3E%3Ccircle cx='60' cy='60' r='13'/%3E%3Cpath d='M0 60h22M98 60h22M60 0v22M60 98v22'/%3E%3C/g%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -50,7 +50,7 @@ body{margin:0}
 *{box-sizing:border-box}
 html{direction:rtl}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.75;
-  padding-bottom:calc(var(--player-h) + env(safe-area-inset-bottom,0px) + 28px);position:relative;min-height:100vh}
+  padding-bottom:calc(var(--player-h) + var(--bnav) + env(safe-area-inset-bottom,0px) + 28px);position:relative;min-height:100vh}
 body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:radial-gradient(ellipse 80% 60% at 70% 0%,var(--bg-hi),transparent 70%),var(--pattern);background-size:auto,120px 120px;opacity:1}
 :root[data-theme="dark"] body::after{opacity:.55}
@@ -88,6 +88,44 @@ nav.tabs a:hover:not([aria-current]){color:var(--ink);background:var(--brass-sof
 .icon-btn{width:38px;height:38px;border-radius:50%;display:inline-grid;place-items:center;color:var(--muted);transition:background .15s,color .15s}
 .icon-btn:hover{background:var(--brass-soft);color:var(--ink)}
 .icon-btn svg{width:20px;height:20px}
+/* ---------- bottom bar (phones): four places instead of a long strip of tabs ---------- */
+.bnav{display:none}
+@media (max-width:760px){
+  :root{--bnav:56px}
+  nav.tabs{display:none!important}
+  .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;inset:auto 0 0;z-index:24;height:calc(var(--bnav) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);
+    background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border-top:1px solid var(--line);translate:0 var(--vvdy,0px)}
+  .bnav a{position:relative;display:grid;place-content:center;justify-items:center;gap:1px;text-decoration:none;color:var(--muted);font-size:.7rem;font-weight:500;-webkit-tap-highlight-color:transparent;transition:color .25s}
+  .bnav a svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .bnav a::before{content:"";position:absolute;top:-1px;left:50%;width:0;height:2.5px;border-radius:0 0 3px 3px;background:var(--gold);translate:-50% 0;transition:width .3s cubic-bezier(.25,.8,.25,1)}
+  .bnav a[aria-current="page"]{color:var(--brass);font-weight:600}
+  .bnav a[aria-current="page"]::before{width:34px}
+  .bnav a:active{background:var(--brass-soft)}
+  body .player{bottom:calc(var(--bnav) + env(safe-area-inset-bottom,0px));padding-bottom:0}
+  body.typing .bnav,body.pv .bnav{display:none}
+}
+/* ---------- my library ---------- */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:6px}
+.mcard{display:grid;gap:2px;padding:16px 16px 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);text-decoration:none;color:var(--ink);transition:transform .15s,border-color .15s}
+.mcard:active{transform:scale(.97)}.mcard:hover{border-color:var(--line-strong)}
+.mcard .mi{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--brass-soft);color:var(--brass);margin-bottom:6px}
+.mcard .mi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mcard b{font-family:var(--f-display);font-size:1.25rem;line-height:1.5}
+.mcard small{color:var(--muted);font-size:.8rem}
+.mlinks{display:flex;gap:10px;flex-wrap:wrap}
+/* ---------- Ramadan: tonight's night across the years, side by side ---------- */
+.tonight{margin-top:8px}
+.tnrail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:6px 2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tnrail::-webkit-scrollbar{display:none}
+.tn{flex:none;width:148px;scroll-snap-align:start;display:grid;justify-items:center;gap:2px;padding:30px 12px 14px;border-radius:80px 80px 18px 18px;border:1px solid #8F6A22;cursor:pointer;font:inherit;text-align:center;
+  background:radial-gradient(90% 60% at 50% 0%,rgba(227,195,106,.22),transparent 70%),linear-gradient(180deg,#2E2110,#1A130B);color:#F5E8C8;box-shadow:0 14px 28px -16px rgba(30,20,8,.6);transition:transform .15s}
+.tn:active{transform:scale(.97)}
+.tn .y{font-family:var(--f-display);font-weight:700;font-size:2.1rem;line-height:1.3;background:linear-gradient(180deg,#FBEBB8,#E3C36A 60%,#C9A24B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tn .tt{font-size:.74rem;color:#D9C79C;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:3em}
+.tn .dd{font-size:.72rem;color:#A8946A}
+.tn .pb{width:42px;height:42px;border-radius:50%;margin-top:8px;display:grid;place-items:center;background:var(--gold);color:#1A1209;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.tn .pb svg{width:18px;height:18px}
+.tn.on{border-color:#E3C36A;box-shadow:0 0 0 2px rgba(227,195,106,.45),0 14px 28px -16px rgba(30,20,8,.6)}
 /* slim nav bar (back + page title) */
 .navbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:22;height:52px;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(180deg,#2E2110,#1E160D);border-bottom:1px solid #8F6A22;box-shadow:0 6px 18px rgba(30,20,8,.28)}
@@ -484,7 +522,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 body.pv{padding-bottom:24px}
 body.pv .player,body.pv [data-playall],body.pv .resume,body.pv .kbd{display:none!important}
 body.pv .toast{bottom:24px}
-.toast{position:fixed;left:50%;translate:-50% 0;bottom:calc(var(--player-h) + env(safe-area-inset-bottom,0px) + 16px);background:var(--night);color:var(--night-ink);border:1px solid #8F6A22;
+.toast{position:fixed;left:50%;translate:-50% 0;bottom:calc(var(--player-h) + var(--bnav) + env(safe-area-inset-bottom,0px) + 16px);background:var(--night);color:var(--night-ink);border:1px solid #8F6A22;
   padding:8px 18px;border-radius:999px;font-size:.86rem;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 
@@ -523,7 +561,7 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .ytbox{position:fixed;left:50%;transform:translateX(-50%);bottom:112px;width:min(560px,calc(100% - 32px));aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);z-index:40}
 .ytbox iframe{width:100%;height:100%;border:0;display:block}
-#vbox{bottom:calc(var(--player-h) + 14px + env(safe-area-inset-bottom,0px));touch-action:none;transition:width .2s}
+#vbox{bottom:calc(var(--player-h) + var(--bnav) + 14px + env(safe-area-inset-bottom,0px));touch-action:none;transition:width .2s}
 #vbox.tuck{transform:translateX(-125%)!important;pointer-events:none;transition:transform .28s ease}
 .vtab{position:fixed;z-index:41;left:0;top:38vh;width:34px;height:84px;border:1px solid #8F6A22;border-left:0;border-radius:0 18px 18px 0;
   background:linear-gradient(180deg,#34261280,#1E160D);background-color:#1E160D;color:#E3C36A;display:grid;place-items:center;cursor:pointer;box-shadow:6px 8px 22px rgba(0,0,0,.4);padding:0}
@@ -995,6 +1033,12 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
   </div>
 </footer>
 
+<nav class="bnav" id="bnav" aria-label="التنقل السريع">
+  <a href="#" data-bn="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>الرئيسية</a>
+  <a href="#ramadan" data-bn="ramadan"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>رمضان</a>
+  <a href="#surahs" data-bn="surahs"><svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5v13c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5zM12 6v13"/></svg>السور</a>
+  <a href="#mine" data-bn="mine"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.3-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.7 12 20 12 20Z"/></svg>مكتبتي</a>
+</nav>
 <div class="player" id="player" aria-label="المشغل">
   <button class="pclose" id="pclose" title="إغلاق التلاوة" aria-label="إغلاق التلاوة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   <div class="wrap">
@@ -1444,6 +1488,45 @@ function todayPick() {
   }
   return { r: pool[(dn * 7919) % pool.length], why: "تلاوة اليوم" };
 }
+/* ---------- Ramadan mode: tonight's night from every year ---------- */
+let lastTonight = [];
+function ramadanNight() {
+  const m = /[?&]rn=(\d+)/.exec(location.search); if (m) return Math.max(1, Math.min(30, +m[1]));   /* ?rn=15 previews night 15 */
+  const now = new Date(), hj = hijriParts(now); if (!hj || hj.month !== 9) return 0;
+  const loc = store.get("loc", null) || LOCS.riyadh, t = PT.compute(now, loc.lat, loc.lng, true), h = now.getHours() + now.getMinutes() / 60;
+  const n = h >= t.maghrib ? hj.day + 1 : hj.day;   /* the night starts at sunset */
+  return n > 30 ? 0 : n;
+}
+function tonightRail() {
+  const n = ramadanNight(); if (!n) return "";
+  const list = ALL.filter(r => r.cat === "ramadan" && r.night && r.night <= n && (r.nightTo || r.night) >= n && r.url).sort((a, b) => (b.year || 0) - (a.year || 0));
+  lastTonight = list; if (!list.length) return "";
+  return `<section class="block tonight">
+    <div class="block-h"><h2>الليلة ${AR(n)} من رمضان</h2><button class="btn pri" data-tnall type="button">${icon("i-play")}تشغيل الكل</button></div>
+    <p class="note" style="margin:-8px 0 8px">تلاوات الشيخ في هذه الليلة عبر السنين، جنب بعض. اسحب يمين ويسار.</p>
+    <div class="tnrail">${list.map(r => `<button class="tn${player.cur && player.cur.key === r.key ? " on" : ""}" type="button" data-tn="${esc(r.key)}" aria-label="تشغيل ${esc(r.title)}">
+      <span class="y">${r.year ? AR(r.year) : "—"}</span><span class="tt">${esc(r.title)}</span><span class="dd">${r.d ? fmt(r.d) : "&nbsp;"}</span><span class="pb">${icon("i-play")}</span></button>`).join("")}</div>
+  </section>`;
+}
+/* ---------- most listened by visitors (from the site's own statistics, refreshed twice a day) ---------- */
+const TOPSTAT = { api: "https://qatami.goatcounter.com/api/v0/stats/hits?limit=100&daily=true", token: "1chh9xicxa1jazrv1ipo9sv6ls5t4hf9oo7dho5mnawad6yp0", ttl: 12 * 3600e3, busy: false };
+function topRows() { const c = store.get("top", null); return c && Array.isArray(c.k) ? c.k.map(k => BY_KEY.get(k)).filter(Boolean).slice(0, 5) : []; }
+function topInner(rows) { return `<div class="block-h"><h2>الأكثر استماعًا</h2><span class="note">هذا الشهر</span></div>${trackList(rows, "home")}`; }
+function topSection() { const rows = topRows(); return `<section class="block" id="topSec"${rows.length >= 3 ? "" : " hidden"}>${rows.length >= 3 ? topInner(rows) : ""}</section>`; }
+async function topRefresh() {
+  const c = store.get("top", null); if (TOPSTAT.busy || (c && Date.now() - c.t < TOPSTAT.ttl)) return;
+  TOPSTAT.busy = true;
+  try {
+    const iso = d => d.toISOString().slice(0, 19) + "Z", now = new Date();
+    const r = await fetch(`${TOPSTAT.api}&start=${iso(new Date(now - 30 * 864e5))}&end=${iso(now)}`, { headers: { Authorization: "Bearer " + TOPSTAT.token, "Content-Type": "application/json" } });
+    if (!r.ok) throw 0;
+    const k = ((await r.json()).hits || []).filter(h => h.event && /^min\//.test(h.path) && h.count > 0).sort((a, b) => b.count - a.count).map(h => h.path.slice(4)).filter(x => BY_KEY.has(x)).slice(0, 8);
+    store.set("top", { t: Date.now(), k });
+    const sec = document.getElementById("topSec"), rows = topRows();
+    if (sec && sec.hidden && rows.length >= 3) { sec.innerHTML = topInner(rows); sec.hidden = false; curList = [...document.querySelectorAll("#view [data-list] li")].map(li => BY_KEY.get(li.dataset.key)); }
+  } catch { store.set("top", { t: Date.now() - TOPSTAT.ttl + 30 * 60e3, k: (c && c.k) || [] }); }   /* failed: try again in half an hour */
+  TOPSTAT.busy = false;
+}
 /* install as app */
 let deferredInstall = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; if (curRoute === "") route(); });
@@ -1746,15 +1829,14 @@ const views = {
       ${portrait()}
     </section>
     <div class="orn"><i></i></div>`;
-    const tp = todayPick(), todayCard = tp ? `<div class="resume todaypick" style="margin-top:24px"><button class="play" data-play="${esc(tp.r.key)}" aria-label="تشغيل تلاوة اليوم" style="margin:0">${icon("i-play")}</button>
-      <div class="t"><small>${tp.why}</small><strong>${esc(tp.r.title)}</strong> <span class="note">· ${esc(tp.r.c.title)}${tp.r.year && tp.r.c.multi ? " · " + yearLabel(tp.r.year) : ""}</span></div></div>` : "";
-    const rest = `${todayCard}${lr ? `<div class="resume" style="margin-top:24px"><button class="play" data-play="${esc(lr.key)}" data-resume="1" aria-label="متابعة" style="margin:0">${icon("i-play")}</button>
+    const rest = `${lr ? `<div class="resume" style="margin-top:24px"><button class="play" data-play="${esc(lr.key)}" data-resume="1" aria-label="متابعة" style="margin:0">${icon("i-play")}</button>
       <div class="t"><small>تابع من حيث توقفت${pos[lr.key] ? " عند " + fmt(pos[lr.key]) : ""}</small><strong>${esc(lr.title)}</strong> <span class="note">· ${esc(lr.c.title)}</span></div></div>` : ""}
-    <section class="today">${prayerPanel()}${wirdPanel()}</section>`;
+    <section class="today">${prayerPanel()}${wirdPanel()}</section>
+    ${topSection()}`;
     const doorsTop = `<section class="doors" style="margin-top:6px">${door("ramadan")}${door("fard")}</section>`;
     if (!ALL.length) return hero + rest + `<div class="empty" style="margin-top:24px">نرتّب التلاوات الآن، وتُضاف هنا قريبًا مقسّمة حسب السنين.</div>`;
     const gems = (COLLECTIONS.find(c => c.id === "gems") || { tracks: [] }).tracks.slice(0, 6).map(t => BY_KEY.get("gems:" + t.id)).filter(Boolean);
-    return hero + installCard() + doorsTop + `
+    return hero + tonightRail() + installCard() + doorsTop + `
     <section class="block">
       <div class="block-h"><h2>عبر السنين</h2></div>
       ${yearRail()}
@@ -1766,6 +1848,23 @@ const views = {
     </section>` : ""}
     ${gems.length ? `<section class="block"><div class="block-h"><h2>روائع رمضانية</h2><a class="link-more" href="#c-gems">كل المختارات</a></div>${trackList(gems, "home")}</section>` : ""}
 `;
+  },
+  mine() {
+    const savedN = OFF.ok ? ALL.filter(r => OFF.set.has(r.url)).length : 0, marksN = Object.values(marks).reduce((a, m) => a + (m ? m.length : 0), 0);
+    const today = Math.round((lt[dkey(new Date())] || 0) / 60), sv = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+    const card = (href, ic, title, sub) => `<a class="mcard" href="#${href}"><span class="mi">${ic}</span><b>${title}</b><small>${sub}</small></a>`;
+    const cnt = n => n ? pl(n, "rec") : "فارغة الآن";
+    return `<div class="page-h"><div class="t"><h1>مكتبتي</h1><p>كل اللي يخصك في مكان واحد. يُحفظ في هذا الجهاز.</p></div></div>
+      <div class="mgrid">
+        ${card("fav", sv('<path d="M12 20s-7-4.3-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.7 12 20 12 20Z"/>'), "المفضلة", cnt(favs.size))}
+        ${card("lists", sv('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>'), "قوائمي", lists.length ? AR(lists.length) + (lists.length > 2 && lists.length < 11 ? " قوائم" : " قائمة") : "ما سويت قائمة بعد")}
+        ${card("marks", sv('<path d="M7 3h10v18l-5-4-5 4z"/>'), "علاماتي", marksN ? AR(marksN) + " علامة" : "لا علامات بعد")}
+        ${card("saved", sv('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'), "المحمّل", savedN ? cnt(savedN) + " بدون نت" : "لا شيء محمّل")}
+        ${card("history", sv('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'), "السجل", hist.length ? "آخر ما سمعت" : "يبدأ مع أول تلاوة")}
+        ${card("stats", sv('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/>'), "وِردي", `${AR(today)} من ${AR(goal)} دقيقة اليوم`)}
+      </div>
+      <section class="block"><div class="block-h"><h2>أقسام أخرى</h2></div>
+        <div class="mlinks"><a class="btn" href="#fard">تلاوات الفروض</a><a class="btn" href="#mushafs">الإصدارات</a></div></section>`;
   },
   stats() {
     const today = new Date(), days = [];
@@ -2055,12 +2154,15 @@ function route() {
   else if (h === "ramadan") { html = views.ramadan(); nav = "ramadan"; }
   else if (h === "fard") { html = views.fard(); nav = "fard"; }
   else if (h === "stats") { html = views.stats(); nav = "stats"; }
+  else if (h === "mine") { html = views.mine(); nav = "mine"; }
   else if (h.startsWith("c-")) { html = views.collection(h.slice(2)); nav = "mushafs"; }
   else if (h.startsWith("s-")) { html = views.surah(h.slice(2)); nav = "surahs"; }
   else if (h.startsWith("y-")) { html = views.year(h.slice(2)); nav = /-f$/.test(h) ? "fard" : /-r$/.test(h) ? "ramadan" : ""; }
   else { html = views.home(); nav = "home"; }
   $("#view").innerHTML = html;
   document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === nav) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  const bn = q ? "" : nav === "home" || nav === "ramadan" || nav === "surahs" ? nav : ["mine", "fav", "saved", "marks", "history", "lists", "stats"].includes(nav) ? "mine" : "";
+  document.querySelectorAll("[data-bn]").forEach(a => { if (a.dataset.bn === bn) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   moveTab();
   curList = [...document.querySelectorAll("#view [data-list] li")].map(li => BY_KEY.get(li.dataset.key));
   offNav(); offUse(); marksNav();
@@ -2964,6 +3066,9 @@ addEventListener("keydown", e => {
 
 /* delegated clicks */
 document.addEventListener("click", async e => {
+  const tn = e.target.closest("[data-tn]");
+  if (tn) { const r = BY_KEY.get(tn.dataset.tn); if (r) { setQueue(lastTonight, r.key); load(r); document.querySelectorAll(".tn").forEach(x => x.classList.toggle("on", x === tn)); } return; }
+  if (e.target.closest("[data-tnall]")) { if (lastTonight.length) { setQueue(lastTonight, lastTonight[0].key); load(lastTonight[0]); } return; }
   const p = e.target.closest("[data-play]");
   if (p) { e.preventDefault(); const key = p.dataset.play;
     if (p.dataset.resume) { const r = BY_KEY.get(key); playKey(key, r.c.tracks.map(t => BY_KEY.get(r.c.id + ":" + t.id))); }
@@ -3033,6 +3138,7 @@ $("#cardShare").onclick = async () => { const b = await cardBlob(); if (!b) retu
 
 /* boot */
 route();
+setTimeout(topRefresh, 2500);
 const last = store.get("last", null), lr = last && BY_KEY.get(last.key);
 if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.key); player.cur = lr;
   $("#nowTitle").textContent = lr.title; $("#nowSub").textContent = lr.c.title + (pos[lr.key] > 5 ? " · توقفت عند " + fmt(pos[lr.key]) : "");
@@ -3196,10 +3302,10 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
   /* أربعة فصول، وكل خطوة تضيء عنصرًا حقيقيًا في الصفحة */
   var CH=["اكتشف","يومك","استمع","لك"];
   var STEPS=[
+    {c:0,sel:".bnav",fixed:1,t:"كل الأقسام تحت",p:"الرئيسية، رمضان، السور، و<b>مكتبتي</b>: فيها مفضلتك وقوائمك وعلاماتك والمحمّل ووِردك."},
     {c:0,sel:"nav.tabs",top:1,t:"كل الأقسام هنا",p:"ليالي رمضان، الفروض، السور، الإصدارات، ووِردك. <b>اسحب الشريط</b> لتشوف الباقي."},
     {c:0,sel:"label.search",top:1,t:"ابحث بكلامك",p:"اكتب اسم السورة أو السنة أو الليلة، والموقع يفهمك.",chips:["ليلة ٢٧","الكهف ١٤٤٤","فجر"]},
     {c:0,sel:".doors",t:"ليالي رمضان والفروض",p:"اضغط أي باب وتنفتح لك السنين، وداخل كل سنة الليالي <b>ليلةً ليلة</b>."},
-    {c:1,sel:".resume.todaypick",t:"تلاوة اليوم",p:"تلاوة مختارة تتغير كل يوم. وإذا وقفت في أي تلاوة، يظهر هنا زر <b>«تابع من حيث توقفت»</b>."},
     {c:1,sel:".today .panel:first-child",t:"يقترح لك حسب الوقت",p:"مواقيت الصلاة، واقتراح يناسب الساعة: فجريات عند الفجر، وفي رمضان تلاوات <b>الليلة نفسها</b>."},
     {c:1,sel:".today .panel:last-child",t:"وِردك اليومي",p:"حدد كم دقيقة تسمع كل يوم، ويحسب لك أيامك المتتالية."},
     {c:2,sel:".tracks li .acts",page:"list",t:"أزرار كل تلاوة",p:"هذي صفحة سنة ١٤٤٤هـ. بجانب كل تلاوة: <b>♡</b> للمفضلة، <b>⤓</b> للاستماع بدون نت، و<b>⋯</b> فيها:",chips:["＋ قائمة","بطاقة للواتساب","الرابط"]},
@@ -3323,7 +3429,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
   function start(){
     var ys=document.querySelectorAll('a[href^="#y-"]'),a=document.querySelector('a[href="#y-1444"]')||ys[ys.length-1]||$('a[href^="#c-"]');
     listHash=a?a.getAttribute("href"):null;
-    steps=STEPS.filter(function(s){if(s.page==="list")return !!listHash;var el=$(s.sel);return !!el&&(s.fixed||visible(el))});
+    steps=STEPS.filter(function(s){if(s.page==="list")return !!listHash;var el=$(s.sel);return !!el&&((s.fixed&&s.sel!==".bnav")||visible(el))});
     if(intro){
       var r=intro.querySelector(".tg-arch").getBoundingClientRect();
       lastBox={top:scrollY+r.top,left:scrollX+r.left,width:r.width,height:r.height,bottom:scrollY+r.bottom,right:scrollX+r.right};
@@ -3351,7 +3457,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
     else if(!s.page&&!s.top&&!s.fixed&&!onHome()){location.hash="";await wait(480)}
     if(!tip)return;
     var el=$(s.sel);
-    if(!el||(!s.fixed&&!visible(el))){busy=false;var k=n+dir;if(k<0)k=n+1;return go(k,dir)}
+    if(!el||((!s.fixed||s.sel===".bnav")&&!visible(el))){busy=false;var k=n+dir;if(k<0)k=n+1;return go(k,dir)}
     cur=n;s.el=el;
     var bh=RM?"auto":"smooth";
     if(s.top){var hd=$("header.top");hd&&hd.classList.remove("hide");if(scrollY>2)scrollTo({top:0,behavior:bh});await settle(el);var v0=await viewport(),rr=el.getBoundingClientRect();
@@ -3438,7 +3544,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
     tip.innerHTML='<div class="tg-fin"><div class="tg-burst">'+burst+'</div><div class="tg-seal" style="margin:0 auto 4px">✦</div><h3>صرت تعرف الموقع</h3>'+
       '<p>وهذي ميزات تلقاها وأنت تستمع:</p>'+
       '<div class="tg-feats">'+FEATS.map(function(f,i){return '<div style="--i:'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+IC[f[0]]+'</svg><b>'+f[1]+'</b><small>'+f[2]+'</small></div>'}).join("")+'</div>'+
-      '<div class="tg-act">'+($(".todaypick [data-play]")?'<button class="tg-btn pri" data-tg="listen">شغّل تلاوة اليوم</button>':'<button class="tg-btn pri" data-tg="end">ابدأ الاستماع</button>')+
+      '<div class="tg-act">'+($(".suggest [data-playall]")?'<button class="tg-btn pri" data-tg="listen">شغّل تلاوة يومك</button>':'<button class="tg-btn pri" data-tg="end">ابدأ الاستماع</button>')+
       '<button class="tg-skip" data-tg="again">أعد الجولة</button></div></div>';
     center(V);
     await frame();center(V);
@@ -3446,7 +3552,7 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
     var b=tip.querySelector(".pri");b&&b.focus({preventScroll:true});
     busy=false;
   }
-  function listen(){var p=$(".todaypick [data-play]");end();if(p)setTimeout(function(){p.click()},250)}
+  function listen(){var p=$(".suggest [data-playall]");end();if(p)setTimeout(function(){p.click()},250)}
   function again(){teardown();setTimeout(welcome,RM?0:720)}
   function end(){LS.set("done");try{typeof stat==="function"&&stat("tour/"+(cur===-2?"finished":cur>=0?"skipped-at-"+(cur+1):"closed"))}catch(e){}teardown()}
 
