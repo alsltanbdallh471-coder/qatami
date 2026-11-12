@@ -130,6 +130,7 @@ body.hasnav header.top{top:calc(env(safe-area-inset-top,0px) + 52px)}
 .emblem .lbl span::before,.emblem .lbl span::after{content:"";width:22px;height:1px;background:var(--line-strong)}
 
 /* portrait */
+#view{overflow-x:clip}  /* the portrait glow is wider than a phone screen; keep it from widening the page */
 .portrait{position:relative;width:min(330px,74vw);margin:18px auto 0;aspect-ratio:3/4.25;padding:6px;border-radius:999px 999px 26px 26px;background:var(--gold);
   box-shadow:0 34px 70px rgba(110,79,20,.28),0 0 0 9px color-mix(in srgb,var(--surface) 72%,transparent),0 0 0 10px color-mix(in srgb,var(--line-strong) 45%,transparent)}
 .portrait::before{content:"";position:absolute;inset:-46px -60px;z-index:-1;background:radial-gradient(closest-side,color-mix(in srgb,#D9B45E 30%,transparent),transparent);filter:blur(8px)}
@@ -488,6 +489,7 @@ body.pv .toast{bottom:24px}
 .toast.show{opacity:1}
 
 .kbd{font-size:.76rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+@media (hover:none),(pointer:coarse){.kbd{display:none}}  /* keyboard shortcuts mean nothing on a touch screen */
 kbd{font-family:var(--f-ui);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:.72rem;background:var(--surface)}
 footer{margin-top:56px;padding-block:28px;color:var(--muted);font-size:.82rem}
 footer .wrap{display:grid;gap:12px;justify-items:center;text-align:center}
@@ -3466,6 +3468,8 @@ if (lr) { setQueue(lr.c.tracks.map(t => BY_KEY.get(lr.c.id + ":" + t.id)), lr.ke
     target.classList.add("tg-glow");
     var gone=false,kill=function(){if(gone)return;gone=true;h.classList.add("bye");target.classList.remove("tg-glow");setTimeout(function(){h.remove()},320)};
     h.addEventListener("click",kill);setTimeout(kill,7000);
+    /* a hint belongs to the page it appeared on: leave with it, and go once the page is scrolled away */
+    addEventListener("hashchange",kill,{once:true});var y0=scrollY,sc=function(){if(Math.abs(scrollY-y0)>90){removeEventListener("scroll",sc);kill()}};addEventListener("scroll",sc,{passive:true});
     return true;
   }
   function watchHints(){
