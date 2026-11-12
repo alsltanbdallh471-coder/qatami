@@ -791,6 +791,13 @@ dialog.infodlg::backdrop{background:rgba(20,13,5,.6)}
 .fp .fph .x{position:absolute;inset-inline-start:10px;top:50%;translate:0 -50%;color:#E3C36A}
 .fp .fpw{max-width:520px;margin:0 auto;padding:18px 22px 40px}
 .fp .art{display:grid;place-items:center;padding:6px 0 4px}
+/* video inside the now-playing page: the same video box sits where the cover was */
+.fp .fpv{margin:8px 0 6px}.fp .fpv[hidden]{display:none}
+.fp .fpv:not([hidden])+.art{display:none}
+#vbox.infp:not(.full){position:relative!important;inset:auto!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;width:100%!important;height:auto!important;aspect-ratio:16/9!important;
+  transform:none!important;translate:none!important;animation:none!important;margin:0!important;border-radius:18px!important;overflow:hidden;touch-action:pan-y;cursor:auto;border:1px solid #C9A24B;box-shadow:0 18px 34px -18px rgba(42,28,10,.6)}
+#vbox.infp:not(.full) .vbar{display:none}
+dialog.fp:has(#vbox.full){overflow:hidden}
 .fp .art svg{width:190px;height:190px;filter:drop-shadow(0 0 22px rgba(226,194,111,.5)) drop-shadow(0 14px 16px rgba(42,28,10,.35))}
 .fp h2.tt{font-family:var(--f-display);font-size:1.55rem;line-height:1.65;font-weight:700;text-align:center;margin:12px 0 2px}
 .fp .crumb{text-align:center;color:var(--muted);font-size:.84rem;line-height:1.7}
@@ -2787,8 +2794,18 @@ function mediaSession(r) {
     tk.innerHTML = d ? (r.t.idx || []).map(([t]) => `<i class="c" style="right:${Math.min(99, t / d * 100)}%"></i>`).join("") + l.map(m => `<i style="right:${Math.min(99, m.t / d * 100)}%"></i>`).join("") : "";
     ul.innerHTML = l.map(m => `<li class="${m.t === flashT ? "new" : ""}"><button class="go" data-mkgo="${esc(r.key)}" data-t="${m.t}" type="button">${icon("i-play")}<b>${fmt(m.t)}</b></button><input class="mkn" data-mkn="${m.t}" value="${esc(m.n || "")}" maxlength="60" placeholder="ملاحظة (اختياري)" aria-label="ملاحظة"><button class="icon-btn" data-mkshare="${esc(r.key)}" data-t="${m.t}" type="button" aria-label="مشاركة العلامة">${icon("i-share")}</button><button class="icon-btn" data-mkdel="${esc(r.key)}" data-t="${m.t}" type="button" aria-label="حذف العلامة">${icon("i-x")}</button></li>`).join("");
   }
+  /* the video box lives in the page; while this sheet shows a video it is lent to the sheet, and always handed back before the sheet is redrawn or closed */
+  const vb = document.getElementById("vbox"), vbHome = vb.parentNode, vbNext = vb.nextSibling;
+  function vMove(fn) { const was = !audio.paused; fn(); if (was && audio.paused) { const p = audio.play(); if (p && p.catch) p.catch(() => {}); } }
+  function vHome() { if (vb.parentNode !== vbHome) vMove(() => { vb.classList.remove("infp"); vbHome.insertBefore(vb, vbNext && vbNext.parentNode === vbHome ? vbNext : null); }); }
+  function vDock() {
+    const r = player.cur, slot = q("#fpV"), on = !!(r && slot && !r.yt && VMODE.has(r.key) && asVid(r));
+    if (!on) { vHome(); if (slot) slot.hidden = true; return; }
+    slot.hidden = false;
+    if (vb.parentNode !== slot) vMove(() => { if (vb.classList.contains("full")) vFull(false); vb.classList.remove("mini", "tuck", "dragged", "snap"); vb.classList.add("infp"); slot.appendChild(vb); });
+  }
   function render() {
-    const r = player.cur; if (!r) return; dlg.dataset.key = r.key;
+    const r = player.cur; if (!r) return; dlg.dataset.key = r.key; vHome();
     const catN = r.cat === "ramadan" ? "ليالي رمضان" : r.cat === "fard" ? "تلاوات الفروض" : "";
     const night = r.night ? (r.nightTo && r.nightTo !== r.night ? `الليالي ${AR(r.night)}–${AR(r.nightTo)}` : `الليلة ${AR(r.night)}`) : "";
     const date = r.date ? `${AR(r.date[0])} ${MONTHS[r.date[1] - 1] || ""}` : "";
@@ -2798,7 +2815,7 @@ function mediaSession(r) {
     const canOff = typeof OFF !== "undefined" && OFF.ok && !r.yt, saved = canOff && offSaved(r);
     dlg.innerHTML = `<div class="fph"><button class="icon-btn x" data-fpclose aria-label="إغلاق"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>التلاوة الآن</div>
     <div class="fpw">
-      <div class="art">${coverSVG(r)}</div>
+      <div class="fpv" id="fpV" hidden></div><div class="art">${coverSVG(r)}</div>
       <h2 class="tt">${esc(r.title)}</h2>
       <div class="crumb">${esc(crumb)}${crumb ? "<br>" : ""}${esc(r.c.title)}</div>
       ${r.vurl ? `<div class="vseg" role="group" aria-label="طريقة التشغيل"><button type="button" data-vset="0" aria-pressed="${!VMODE.has(r.key)}">صوتي</button><button type="button" data-vset="1" aria-pressed="${VMODE.has(r.key)}">مرئي</button></div>` : ""}
@@ -2830,7 +2847,7 @@ function mediaSession(r) {
         ${r.fb ? `<a class="btn" href="${esc(r.fb)}" target="_blank" rel="noopener">صفحة المصدر</a>` : ""}
       </div>
     </div>`;
-    paintMarks();
+    paintMarks(); vDock();
     const sk = q("#fpSeek");
     sk.addEventListener("input", () => { fpSeeking = true; sk.style.setProperty("--p", sk.value / 10 + "%"); if (isFinite(audio.duration)) q("#fpCur").textContent = fmt(sk.value / 1000 * audio.duration); });
     sk.addEventListener("change", () => { if (isFinite(audio.duration)) audio.currentTime = sk.value / 1000 * audio.duration; fpSeeking = false; });
@@ -2874,7 +2891,7 @@ function mediaSession(r) {
   function spMeasure() {
     SPR.H = innerHeight; const dr = dlg.getBoundingClientRect(), art = q(".art svg"), nn = document.getElementById("nowNum");
     const ar = art && art.getBoundingClientRect(), mr = nn && nn.getBoundingClientRect();
-    SPR.A = ar ? { x: ar.left, y: ar.top - dr.top, w: ar.width } : null;
+    SPR.A = ar && ar.width ? { x: ar.left, y: ar.top - dr.top, w: ar.width } : null;
     SPR.M = mr && mr.width ? { x: mr.left + mr.width / 2 - 20, y: mr.top + mr.height / 2 - 20, w: 40 } : null;
     SPR.pages = [...document.querySelectorAll("body > header.top, body > div.wrap, body > main, body > footer")];
     const cy = innerHeight / 2; SPR.pages.forEach(el => { const r = el.getBoundingClientRect(); el.style.transformOrigin = `50% ${(cy - r.top).toFixed(0)}px`; });
@@ -2924,7 +2941,7 @@ function mediaSession(r) {
     spring(SPR.H, v, () => { try { dlg.close(); } catch {} spClean(); });
   }
   dlg.addEventListener("cancel", e => { e.preventDefault(); closeSheet(0); });
-  dlg.addEventListener("close", () => { cancelAnimationFrame(SPR.raf); spClean(); });
+  dlg.addEventListener("close", () => { cancelAnimationFrame(SPR.raf); spClean(); vHome(); });
   /* drag: touch (with preventDefault so the page doesn't bounce) + mouse */
   let G = null;
   const noDrag = t => t.closest("input,textarea,select,.fps,.mklist,.fidx,.pills,.tport,.acts5,.mkrow");
@@ -2959,6 +2976,7 @@ function mediaSession(r) {
   dlg.addEventListener("change", e => { const i = e.target.closest("[data-mkn]"); if (!i || !player.cur) return; const m = (marks[player.cur.key] || []).find(x => x.t === +i.dataset.mkn); if (m) { m.n = i.value.trim(); saveMarks(); } });
   audio.addEventListener("durationchange", () => { if (dlg.open) paintMarks(); });
   dlg.addEventListener("mkrefresh", () => paintMarks());
+  dlg.addEventListener("vrefresh", () => { if (!dlg.open) return; const y = dlg.scrollTop; render(); dlg.scrollTop = y; if (q("#fpV") && !q("#fpV").hidden) dlg.scrollTo({ top: 0, behavior: "smooth" }); });
   document.querySelector(".player .now").addEventListener("click", open);
   dlg.addEventListener("click", e => {
     if (e.target.closest("#fpMkAdd")) {
@@ -3113,7 +3131,7 @@ document.addEventListener("click", async e => {
   const vm = e.target.closest("[data-vmode]");
   if (vm) { e.stopPropagation(); const r = BY_KEY.get(vm.dataset.vmode); if (r) setVMode(r, !(VMODE.has(r.key) && player.cur && player.cur.key === r.key)); return; }
   const vs = e.target.closest("[data-vset]");
-  if (vs && player.cur) { const on = vs.dataset.vset === "1"; if (on !== VMODE.has(player.cur.key)) { setVMode(player.cur, on); if (on) closeSheet(0); else render(); } return; }
+  if (vs && player.cur) { const on = vs.dataset.vset === "1"; if (on !== VMODE.has(player.cur.key)) { setVMode(player.cur, on); document.getElementById("infoDlg").dispatchEvent(new Event("vrefresh")); } return; }
   const cb = e.target.closest("[data-card]");
   if (cb) { const r = BY_KEY.get(cb.dataset.card); if (r) openCard(r); return; }
   const gb = e.target.closest("[data-goal]");
