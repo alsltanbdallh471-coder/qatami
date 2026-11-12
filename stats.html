@@ -152,6 +152,7 @@ footer{margin-top:30px;text-align:center;color:var(--faint);font-size:.7rem}
 body.busy .hero .big,body.busy .tile b{opacity:.35}
 .msg{margin:14px 0 0;border:1px solid rgba(235,133,115,.35);background:rgba(235,133,115,.08);color:#F3B6AA;border-radius:16px;padding:10px 14px;font-size:.82rem;text-align:center}
 .msg[hidden]{display:none}
+.g .gn{display:block;font-family:var(--f-k);font-size:.78rem;color:var(--gold);margin-top:2px}
 .champ .nums b{min-width:2ch}
 </style>
 </head>
@@ -202,10 +203,10 @@ body.busy .hero .big,body.busy .tile b{opacity:.35}
   </section>
 
   <section>
-    <div class="h"><h2>الوفاء</h2><small>هل يرجعون؟</small></div>
+    <div class="h"><h2>الوفاء</h2><small>يرجعون ويطوّلون؟</small></div>
     <div class="duo">
-      <div class="panel g"><div class="rw"><svg viewBox="0 0 120 120"><defs><linearGradient id="gg"><stop stop-color="#FBEFC6"/><stop offset="1" stop-color="#B98F38"/></linearGradient></defs><circle cx="60" cy="60" r="50" stroke="rgba(255,236,190,.1)" stroke-width="9" fill="none"/><circle class="v" id="gBack" style="--len:0" cx="60" cy="60" r="50" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"/></svg><b id="gBackT">–</b></div><span>زوار راجعين (مو أول مرة)</span></div>
-      <div class="panel g"><div class="rw"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" stroke="rgba(255,236,190,.1)" stroke-width="9" fill="none"/><circle class="v" id="gEnd" style="--len:0" cx="60" cy="60" r="50" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"/></svg><b id="gEndT">–</b></div><span>يكمّلون التلاوة لآخرها</span></div>
+      <div class="panel g"><div class="rw"><svg viewBox="0 0 120 120"><defs><linearGradient id="gg"><stop stop-color="#FBEFC6"/><stop offset="1" stop-color="#B98F38"/></linearGradient></defs><circle cx="60" cy="60" r="50" stroke="rgba(255,236,190,.1)" stroke-width="9" fill="none"/><circle class="v" id="gBack" style="--len:0" cx="60" cy="60" r="50" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"/></svg><b id="gBackT">–</b></div><span>زوار راجعين (مو أول مرة)</span><small class="gn" id="gBackN"></small></div>
+      <div class="panel g"><div class="rw"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" stroke="rgba(255,236,190,.1)" stroke-width="9" fill="none"/><circle class="v" id="gEnd" style="--len:0" cx="60" cy="60" r="50" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"/></svg><b id="gEndT">–</b></div><span>سمعوا ١٠ دقائق أو أكثر</span><small class="gn" id="gEndN"></small></div>
     </div>
   </section>
 
@@ -274,14 +275,14 @@ async function allHits(q) {
 const STEPS = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
 function stepSize(m) { const i = STEPS.indexOf(m); if (i > 0) return m - STEPS[i - 1]; if (i === 0) return 1; return m > 60 && m % 30 === 0 ? 30 : 0; }
 function digest(hits, days) {
-  const D = { minutes: 0, listeners: 0, plays: 0, ends: 0, fresh: 0, back: 0, tracks: new Map(), feats: [], errs: [], tour: { done: 0, all: 0 },
+  const D = { ten: 0, minutes: 0, listeners: 0, plays: 0, ends: 0, fresh: 0, back: 0, tracks: new Map(), feats: [], errs: [], tour: { done: 0, all: 0 },
     hours: Array(24).fill(0), daily: Object.fromEntries(days.map(d => [d, { v: 0, pv: 0 }])) };
   const track = (key, title) => { let t = D.tracks.get(key); if (!t) D.tracks.set(key, t = { key, title: title || key, listeners: 0, plays: 0, ends: 0 }); if (title && title !== key) t.title = title; return t; };
   for (const h of hits) {
     const p = h.path || "", c = h.count || 0, i = p.indexOf("/"), kind = h.event ? p.slice(0, i) : "", rest = p.slice(i + 1);
     const perDay = f => (h.stats || []).forEach(s => { if (D.daily[s.day]) f(D.daily[s.day], s.daily || 0); });
     if (!h.event) { perDay((d, n) => { d.pv = Math.max(d.pv, n); }); continue; }
-    if (kind === "listen") { const m = +rest; D.minutes += c * stepSize(m); if (m === 1) D.listeners = c; }
+    if (kind === "listen") { const m = +rest; D.minutes += c * stepSize(m); if (m === 1) D.listeners = c; if (m === 10) D.ten = c; }
     else if (kind === "play") { D.plays += c; track(rest, h.title).plays += c; (h.stats || []).forEach(s => { if (D.daily[s.day]) (s.hourly || []).forEach((n, hr) => D.hours[hr] += n); }); }
     else if (kind === "min") track(rest, h.title).listeners += c;
     else if (kind === "end") { D.ends += c; track(rest, h.title).ends += c; }
@@ -335,7 +336,7 @@ function drawClock(hrs) {
   if (max) { const b = el("text", { y: 16, "text-anchor": "middle", "font-size": 10, fill: "#BFAA80", "font-family": "IBM Plex Sans Arabic" }, svg); b.textContent = (peak < 12 ? "صباحًا" : "مساءً") + " · الذروة"; }
   $("clockNote").innerHTML = max ? `أكثر وقت تشغيل <b class="gt">${hourName(peak)} – ${hourName((peak + 1) % 24)}</b>` : "تظهر أول ما يبدأ الناس يشغّلون";
 }
-function gauge(id, part, whole) { const p = whole ? part / whole : 0; $(id).style.setProperty("--len", (p * 314).toFixed(0)); $(id + "T").textContent = whole ? ar(p * 100) + "٪" : "–"; }
+function gauge(id, part, whole) { const p = whole ? Math.min(1, part / whole) : 0; const n = $(id + "N"); if (n) n.textContent = whole ? ar(part) + " من " + ar(whole) : "لا بيانات بعد"; $(id).style.setProperty("--len", (p * 314).toFixed(0)); $(id + "T").textContent = whole ? ar(p * 100) + "٪" : "–"; }
 const FEAT = { fav: ["♡", "المفضلة"], offline: ["⤓", "بدون نت"], "video-tag": ["▶", "المرئي"], "sleep-timer": ["☾", "مؤقت النوم"], card: ["▣", "بطاقة التلاوة"], share: ["↗", "المشاركة"], list: ["☰", "القوائم"], theme: ["◐", "تغيير المظهر"], "tour-open": ["✦", "فتحوا الجولة"] };
 const REF = n => !n ? "رابط مباشر" : /whatsapp|wa\.me/i.test(n) ? "واتساب" : /google/i.test(n) ? "بحث قوقل" : /t\.co|twitter|x\.com/i.test(n) ? "تويتر / X" : /telegram|t\.me/i.test(n) ? "تيليجرام" : /instagram/i.test(n) ? "إنستقرام" : /snapchat/i.test(n) ? "سناب" : /facebook/i.test(n) ? "فيسبوك" : /youtube/i.test(n) ? "يوتيوب" : n;
 const SHADES = ["#FBEFC6", "#E3C36A", "#B98F38", "#6E5220", "#4A3716"];
@@ -363,7 +364,7 @@ function render(D, P, days, refs, systems, range) {
     $("top").innerHTML = `<div class="champ"><span class="tag">♛ الأولى</span><div class="name">${esc(c.title)}</div><div class="nums"><div><b>${ar(c.listeners)}</b><span>مستمع</span></div><div><b>${ar(c.plays)}</b><span>تشغيل</span></div><div><b>${pc(c)}</b><span>كمّلوها</span></div></div></div>`
       + (tr.length > 1 ? `<ol class="rank">${tr.slice(1).map((t, i) => `<li style="--w:${Math.max(6, Math.max(t.listeners, t.plays) / mx * 100)}%"><span class="n">${ar(i + 2)}</span><div class="t">${esc(t.title)}</div><div class="v">${ar(t.listeners)} <i>مستمع</i><small>${ar(t.plays)} تشغيل</small></div></li>`).join("")}</ol>` : ""); }
   drawClock(D.hours);
-  gauge("gBack", D.back, D.back + D.fresh); gauge("gEnd", Math.min(D.ends, D.plays), D.plays);
+  gauge("gBack", D.back, D.back + D.fresh); gauge("gEnd", D.ten, D.listeners);
   /* features */
   const fs = D.feats.filter(f => FEAT[f.key] && f.n).sort((a, b) => b.n - a.n), fm = Math.max(1, ...fs.map(f => f.n));
   let fh = fs.map(f => `<div class="f"><div class="i">${FEAT[f.key][0]}</div><b>${ar(f.n)}</b><span>${FEAT[f.key][1]}</span><div class="m"><u style="--w:${f.n / fm * 100}%"></u></div></div>`).join("");
