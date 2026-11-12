@@ -8,7 +8,7 @@ self.addEventListener("activate", e => {
 });
 async function page(req) {
   const c = await caches.open(APP);
-  try { const res = await fetch(req); if (res && res.ok && req.mode === "navigate") c.put("./index.html", res.clone()); return res; }
+  try { const res = await fetch(req); if (res && res.ok && req.mode === "navigate" && /\/(index\.html)?$/.test(new URL(req.url).pathname)) c.put("./index.html", res.clone());   /* only the app page itself is the offline fallback, never stats.html */ return res; }
   catch { return (await c.match("./index.html")) || (await c.match("./")) || Response.error(); }
 }
 async function audio(req) {
