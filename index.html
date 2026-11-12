@@ -833,7 +833,7 @@ dialog.fp:has(#vbox.full){overflow:hidden}
 .fp dt{color:var(--muted);padding:9px 0;border-top:1px solid var(--line)}
 .fp dd{margin:0;padding:9px 0;border-top:1px solid var(--line);font-weight:500;overflow-wrap:anywhere}
 .fp dl>:nth-child(-n+2){border-top:0}
-.fp .ia{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.fp .ia{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);justify-content:center}
 .fp .ia .btn{font-size:.82rem;padding:7px 14px}
 .now{cursor:pointer}
 /* fast taps */
@@ -2838,9 +2838,6 @@ function mediaSession(r) {
       <div class="mkrow"><button class="mkadd" id="fpMkAdd" type="button">${icon("i-mark")}<span>علامة هنا</span><b id="fpMkT">٠:٠٠</b></button><button class="mkpl" data-pl="${esc(r.key)}" type="button" aria-label="أضف إلى قائمة">${icon("i-plus")}<span>قائمة</span></button></div>
       <ul class="mklist" id="fpMarks"></ul>
       ${r.t.idx ? `<h3 class="sec">فهرس الليلة</h3><ol class="fidx" id="fpIdx">${r.t.idx.map(([t, n, sub]) => `<li><button type="button" data-mkgo="${esc(r.key)}" data-t="${t}"><b>${fmt(t)}</b><span>${esc(n)}${sub ? `<small>${esc(sub)}</small>` : ""}</span>${icon("i-play")}</button></li>`).join("")}</ol>` : ""}
-      <h3 class="sec">عن هذه التلاوة</h3>
-      <div class="ic">${chips.map(c => `<span>${esc(c)}</span>`).join("")}</div>
-      <dl>${row("المجموعة", esc(r.c.title))}${row("العام", r.year ? `${yearLabel(r.year)} · يوافق ${AR(greg(r.year))}م` : "")}${row("التاريخ", date)}<span id="fpExtra" style="display:contents"></span>${row("المصدر", esc(r.c.src ? r.c.src.name : ""))}</dl>
       <div class="ia">
         <button class="btn" data-card="${esc(r.key)}" type="button">${icon("i-card")}بطاقة مشاركة</button>
         ${r.year ? `<a class="btn" href="#y-${r.year}-${yk}" data-fpclose>كل تلاوات ${AR(r.year)}هـ</a>` : ""}
