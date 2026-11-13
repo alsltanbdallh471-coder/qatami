@@ -2795,19 +2795,26 @@ function mediaSession(r) {
 /* ---------- floating video window (picture in picture): keeps playing outside the site; on iPhone it can be tucked to the screen edge ---------- */
 (function () {
   const btn = document.getElementById("vpip"), vb = document.getElementById("vbox"); if (!btn || !vb) return;
-  const std = !!(document.pictureInPictureEnabled && audio.requestPictureInPicture);
-  const wk = !std && typeof audio.webkitSupportsPresentationMode === "function" && audio.webkitSupportsPresentationMode("picture-in-picture");
-  if (!std && !wk) return;
-  btn.hidden = false;
-  const inPip = () => std ? document.pictureInPictureElement === audio : audio.webkitPresentationMode === "picture-in-picture";
-  async function enter() {
+  /* iPhone speaks its own dialect (webkit presentation mode); try it first there, then the standard one */
+  const hasWk = () => typeof audio.webkitSetPresentationMode === "function" && (typeof audio.webkitSupportsPresentationMode !== "function" || audio.webkitSupportsPresentationMode("picture-in-picture"));
+  const hasStd = () => !!(document.pictureInPictureEnabled && audio.requestPictureInPicture);
+  btn.hidden = false;   /* always there: when it can't work it says why */
+  const inPip = () => document.pictureInPictureElement === audio || audio.webkitPresentationMode === "picture-in-picture";
+  function enter() {
     if (vb.hidden || !audio.src) return;
-    try {
-      if (vb.classList.contains("full")) vFull(false);
-      if (std) await audio.requestPictureInPicture(); else audio.webkitSetPresentationMode("picture-in-picture");
-    } catch { toast("ما قدرت أفتح النافذة العائمة. شغّل المقطع أول ثم جرّب."); }
+    if (vb.classList.contains("full")) vFull(false);
+    let err = "";
+    if (hasWk()) { try { audio.webkitSetPresentationMode("picture-in-picture"); return; } catch (e) { err = e && e.message || "webkit"; } }
+    if (hasStd()) { audio.requestPictureInPicture().catch(e => fail(e && (e.name + ": " + e.message) || "std")); return; }
+    fail(err || "unsupported");
   }
-  async function leave() { try { if (std) await document.exitPictureInPicture(); else audio.webkitSetPresentationMode("inline"); } catch {} }
+  function fail(why) {
+    stat("err/pip");
+    /* last resort on iPhone: the system player, which has its own floating-window button and keeps playing when you leave */
+    if (typeof audio.webkitEnterFullscreen === "function") { try { audio.webkitEnterFullscreen(); toast("اضغط زر النافذة العائمة ⧉ أعلى المقطع، أو اطلع من الموقع والمقطع شغّال."); return; } catch {} }
+    toast(navigator.standalone ? "النافذة العائمة ما تشتغل من أيقونة الشاشة الرئيسية. افتح الموقع من سفاري." : "جهازك أو متصفحك ما يدعم النافذة العائمة (" + why + ")");
+  }
+  function leave() { try { if (audio.webkitPresentationMode === "picture-in-picture") audio.webkitSetPresentationMode("inline"); else if (document.pictureInPictureElement) document.exitPictureInPicture().catch(() => {}); } catch {} }
   btn.addEventListener("click", e => { e.stopPropagation(); inPip() ? leave() : enter(); });
   const changed = () => {
     const on = inPip(); vb.classList.toggle("pip", on); btn.setAttribute("aria-pressed", String(on));
