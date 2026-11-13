@@ -91,17 +91,24 @@ nav.tabs a:hover:not([aria-current]){color:var(--ink);background:var(--brass-sof
 /* ---------- bottom bar (phones): four places instead of a long strip of tabs ---------- */
 .bnav{display:none}
 @media (max-width:760px){
-  :root{--bnav:56px}
+  :root{--bnav:78px}   /* the floating bar (60) + its gap from the screen edge (10) + the gap under the player (8) */
   nav.tabs{display:none!important}
-  .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;inset:auto 0 0;z-index:24;height:calc(var(--bnav) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);
-    background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border-top:1px solid var(--line);translate:0 var(--vvdy,0px)}
-  .bnav a{position:relative;display:grid;place-content:center;justify-items:center;gap:1px;text-decoration:none;color:var(--muted);font-size:.7rem;font-weight:500;-webkit-tap-highlight-color:transparent;transition:color .25s}
-  .bnav a svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  .bnav a::before{content:"";position:absolute;top:-1px;left:50%;width:0;height:2.5px;border-radius:0 0 3px 3px;background:var(--gold);translate:-50% 0;transition:width .3s cubic-bezier(.25,.8,.25,1)}
-  .bnav a[aria-current="page"]{color:var(--brass);font-weight:600}
-  .bnav a[aria-current="page"]::before{width:34px}
-  .bnav a:active{background:var(--brass-soft)}
-  body .player{bottom:calc(var(--bnav) + env(safe-area-inset-bottom,0px));padding-bottom:0}
+  /* a glass pill floating off the edges; a gold lens slides to the current place */
+  .bnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;inset:auto 12px calc(10px + env(safe-area-inset-bottom,0px));z-index:24;height:60px;padding:0 6px;border-radius:99px;
+    background:color-mix(in srgb,var(--surface) 78%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+    border:1px solid color-mix(in srgb,var(--line-strong) 55%,transparent);box-shadow:0 16px 30px -14px rgba(60,40,10,.5),inset 0 1px 0 rgba(255,255,255,.22);translate:0 var(--vvdy,0px)}
+  .bnav .lens{position:absolute;top:6px;bottom:6px;right:6px;width:calc((100% - 12px)/4);border-radius:99px;background:var(--gold);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 16px -8px rgba(143,106,34,.8);
+    translate:calc(var(--i,0)*-100%) 0;transition:translate .42s cubic-bezier(.3,1.25,.4,1),opacity .25s,scale .25s;pointer-events:none}
+  .bnav.none .lens{opacity:0;scale:.6}
+  .bnav a{position:relative;z-index:1;display:grid;place-content:center;justify-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:.68rem;font-weight:500;border-radius:99px;-webkit-tap-highlight-color:transparent;transition:color .3s}
+  .bnav a svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.3,1.5,.5,1)}
+  .bnav a[aria-current="page"]{color:#1A1209;font-weight:600}
+  .bnav a[aria-current="page"] svg{transform:scale(1.06)}
+  .bnav a:active svg{transform:scale(.9)}
+  /* the player floats above it as a card */
+  body .player{inset:auto 12px calc(var(--bnav) + env(safe-area-inset-bottom,0px));padding-bottom:0;border-radius:22px;border:1px solid #8F6A22;box-shadow:0 16px 30px -14px rgba(30,20,6,.6)}
+  body .player::before{left:20px;right:20px;border-radius:0 0 2px 2px}
+  @media (prefers-reduced-motion:reduce){.bnav .lens,.bnav a svg{transition:none}}
   body.typing .bnav,body.pv .bnav{display:none}
 }
 /* ---------- my library ---------- */
@@ -662,6 +669,9 @@ footer .fb{font-family:var(--f-display);font-size:1.6rem;font-weight:700}
 #vbox.full .vtopr{padding-top:calc(6px + env(safe-area-inset-top,0px))}
 #vbox.full .vseek{bottom:env(safe-area-inset-bottom,0px)}
 #vbox .vload{z-index:5}
+#vpip[aria-pressed="true"]{color:#E3C36A}
+#vbox.pip::after{content:"يعمل في النافذة العائمة";position:absolute;inset:0;z-index:2;display:grid;place-items:center;background:#0E0A05;color:#C2AE84;font-size:.85rem;pointer-events:none}
+#vbox.mini #vpip{display:none}
 #vbox .vload b,#vbox .vload small{text-shadow:0 1px 3px rgba(0,0,0,.6)}
 /* full window on a portrait phone: turned a quarter turn so it reads landscape */
 #vbox.full.land{inset:auto!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;width:var(--lh,100vh)!important;height:var(--lw,100vw)!important;
@@ -1060,7 +1070,7 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
   </div>
 </footer>
 
-<nav class="bnav" id="bnav" aria-label="التنقل السريع">
+<nav class="bnav" id="bnav" aria-label="التنقل السريع"><span class="lens" aria-hidden="true"></span>
   <a href="#" data-bn="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>الرئيسية</a>
   <a href="#ramadan" data-bn="ramadan"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>رمضان</a>
   <a href="#surahs" data-bn="surahs"><svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5v13c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5zM12 6v13"/></svg>السور</a>
@@ -1101,7 +1111,7 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <button type="button" class="vtab" id="vtab" aria-label="إظهار المقطع" title="إظهار المقطع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>
 <div class="ytbox" id="vbox" hidden>
-  <video id="audio" preload="auto" playsinline webkit-playsinline controlsList="nodownload"></video>
+  <video id="audio" preload="auto" playsinline webkit-playsinline autopictureinpicture controlsList="nodownload"></video>
   <div class="vtap" id="vtap" aria-hidden="true"><span class="vrip r" id="vripR"><i></i><b></b></span><span class="vrip l" id="vripL"><i></i><b></b></span></div>
   <div class="vui" id="vui">
     <div class="vtopr"><button type="button" id="vclose" aria-label="الرجوع للصوت" title="الرجوع للصوت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="vttl" id="vttl"></span></div>
@@ -1110,7 +1120,7 @@ html.spbg body>header.top,html.spbg body>div.wrap,html.spbg body>main,html.spbg 
       <button type="button" class="vpp" id="vpp" aria-label="تشغيل"><svg class="i-pl" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pa" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></svg></button>
       <button type="button" class="vskip" data-vskip="10" aria-label="تقديم ١٠ ثوانٍ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/><path d="M1 4v6h6"/></svg><span>١٠</span></button>
     </div>
-    <div class="vbot"><span class="vtime"><b id="vcur">0:00</b> / <span id="vdur">0:00</span></span><span class="sp"></span><button type="button" id="vspd" class="vspd" aria-label="سرعة التشغيل">١×</button><button type="button" id="vfs" aria-label="ملء الشاشة" title="ملء الشاشة"><svg class="i-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="i-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button></div>
+    <div class="vbot"><span class="vtime"><b id="vcur">0:00</b> / <span id="vdur">0:00</span></span><span class="sp"></span><button type="button" id="vspd" class="vspd" aria-label="سرعة التشغيل">١×</button><button type="button" id="vpip" aria-label="نافذة عائمة" title="نافذة عائمة: يكمل المقطع وأنت خارج الموقع" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="11.5" y="11.5" width="7" height="5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" id="vfs" aria-label="ملء الشاشة" title="ملء الشاشة"><svg class="i-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="i-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button></div>
   </div>
   <div class="vseek" id="vseek" role="slider" aria-label="موضع المقطع" tabindex="0"><div class="vtrack"><i class="vbuf" id="vbuf"></i><i class="vplayed" id="vplayed"></i></div><i class="vthumb" id="vthumb"></i></div>
   <div class="vload" id="vload" hidden><span class="spin" aria-hidden="true"></span><b id="vloadT">جارٍ تحميل المقطع المرئي…</b><small id="vloadS"></small><div class="vlact" id="vlact" hidden><button type="button" class="pri" data-vl="audio">أكمل بالصوت</button><button type="button" data-vl="retry">حاول مرة ثانية</button></div></div></div>
@@ -2198,6 +2208,7 @@ function route() {
   $("#view").innerHTML = html;
   document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === nav) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   const bn = q ? "" : nav === "home" || nav === "ramadan" || nav === "surahs" ? nav : ["mine", "fav", "saved", "marks", "history", "lists", "stats"].includes(nav) ? "mine" : "";
+  { const bnEl = document.getElementById("bnav"), i = ["home", "ramadan", "surahs", "mine"].indexOf(bn); if (bnEl) { bnEl.classList.toggle("none", i < 0); if (i >= 0) bnEl.style.setProperty("--i", i); } }
   document.querySelectorAll("[data-bn]").forEach(a => { if (a.dataset.bn === bn) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   moveTab();
   curList = [...document.querySelectorAll("#view [data-list] li")].map(li => BY_KEY.get(li.dataset.key));
@@ -2781,6 +2792,32 @@ function mediaSession(r) {
 })();
 
 
+/* ---------- floating video window (picture in picture): keeps playing outside the site; on iPhone it can be tucked to the screen edge ---------- */
+(function () {
+  const btn = document.getElementById("vpip"), vb = document.getElementById("vbox"); if (!btn || !vb) return;
+  const std = !!(document.pictureInPictureEnabled && audio.requestPictureInPicture);
+  const wk = !std && typeof audio.webkitSupportsPresentationMode === "function" && audio.webkitSupportsPresentationMode("picture-in-picture");
+  if (!std && !wk) return;
+  btn.hidden = false;
+  const inPip = () => std ? document.pictureInPictureElement === audio : audio.webkitPresentationMode === "picture-in-picture";
+  async function enter() {
+    if (vb.hidden || !audio.src) return;
+    try {
+      if (vb.classList.contains("full")) vFull(false);
+      if (std) await audio.requestPictureInPicture(); else audio.webkitSetPresentationMode("picture-in-picture");
+    } catch { toast("ما قدرت أفتح النافذة العائمة. شغّل المقطع أول ثم جرّب."); }
+  }
+  async function leave() { try { if (std) await document.exitPictureInPicture(); else audio.webkitSetPresentationMode("inline"); } catch {} }
+  btn.addEventListener("click", e => { e.stopPropagation(); inPip() ? leave() : enter(); });
+  const changed = () => {
+    const on = inPip(); vb.classList.toggle("pip", on); btn.setAttribute("aria-pressed", String(on));
+    if (on) { stat("feature/pip"); if (!store.get("pipTip", 0)) { store.set("pipTip", 1); toast("المقطع الآن في نافذة عائمة ويكمل لو طلعت من الموقع. اسحبها لطرف الشاشة تصير شريط جانبي."); } }
+  };
+  audio.addEventListener("enterpictureinpicture", changed); audio.addEventListener("leavepictureinpicture", changed); audio.addEventListener("webkitpresentationmodechanged", changed);
+  /* browsers that support it open the floating window by themselves when you leave the page */
+  try { audio.autoPictureInPicture = true; } catch {}
+  try { navigator.mediaSession.setActionHandler("enterpictureinpicture", () => { if (!vb.hidden) enter(); }); } catch {}
+})();
 /* ---------- full-screen now playing page (tap the player bar) ---------- */
 (function () {
   const dlg = document.getElementById("infoDlg"); if (!dlg || !dlg.showModal) return;
